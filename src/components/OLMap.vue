@@ -799,6 +799,10 @@ const onMapClick = (callback) => {
   eventListeners['click'] = handler;
   
   return () => {
+    // 卸载顺序「子先父后」：本组件 onUnmounted 已 dispose 并置 mapInstance=null，
+    // 之后父组件才调 unsubscribe，此时 mapInstance 为 null，直接跳过即可
+    //（地图已销毁，事件随之消失，无需再 un）
+    if (!mapInstance) return;
     mapInstance.un('click', handler);
     delete eventListeners['click'];
   };
@@ -828,6 +832,7 @@ const onMapMove = (callback) => {
   eventListeners['pointermove'] = handler;
   
   return () => {
+    if (!mapInstance) return;
     mapInstance.un('pointermove', handler);
     delete eventListeners['pointermove'];
   };
@@ -845,6 +850,7 @@ const onMapZoom = (callback) => {
   eventListeners['zoom'] = handler;
   
   return () => {
+    if (!mapInstance) return;
     mapInstance.getView().un('change:resolution', handler);
     delete eventListeners['zoom'];
   };
@@ -871,6 +877,7 @@ const onMapDragEnd = (callback) => {
   eventListeners['moveend'] = handler;
   
   return () => {
+    if (!mapInstance) return;
     mapInstance.un('moveend', handler);
     delete eventListeners['moveend'];
   };

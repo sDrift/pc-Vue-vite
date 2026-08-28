@@ -65,15 +65,25 @@ import markerImage from '@/assets/vue.svg'
  * ------------------------------------------------------------------
  * 把它设置到 Cesium.Ion.defaultAccessToken 后，所有依赖 ion 数据
  * 的接口（Terrain.fromWorldTerrain、createOsmBuildingsAsync 等）
- * 都会自动带上这个 token 去访问 ion 云端。
+ * 都会自动带上这个 token 去访问 ion 云端，不再走 Cesium 默认
+ * 公共 token（默认 token 会在地图 credit 区显示「using default ion
+ * access token」提示）。
  *
- * 生产环境请替换为自己的 token：
- *   Cesium.Ion.defaultAccessToken = 'eyJhbGciOi...你的token...'
+ * token 从 Vite 环境变量读取，避免硬编码进代码库：
+ *   VITE_CESIUM_ION_TOKEN=eyJhbGciOi...你的token...
+ * 获取：https://cesium.com/ion/signup 注册免费账号，在
+ *   「Access Tokens」页面复制 Default Token。
  *
- * 这里不主动覆盖，沿用 Cesium 内置默认 token（仅用于本地演示）。
- * 如需使用自己的 token，取消下面一行注释并替换字符串即可：
+ * 本地演示：把 token 填到 .env.development.local（不入版本库），
+ *   .env.development / .env.production 只留空占位。
+ * 仅当环境变量存在时才覆盖；未配置则沿用默认 token（仍会显示提示）。
+ *
+ * 时机：本段在 import 后、组件 setup 顶层执行，早于 onMounted 里
+ *   new Cesium.Viewer() / Terrain.fromWorldTerrain()，保证 token 先就位。
  */
-// Cesium.Ion.defaultAccessToken = 'your_access_token'
+if (import.meta.env.VITE_CESIUM_ION_TOKEN) {
+  Cesium.Ion.defaultAccessToken = import.meta.env.VITE_CESIUM_ION_TOKEN
+}
 
 /* 组件 ref：指向地图容器 div，Viewer 初始化时需要这个 DOM 节点 */
 const containerRef = ref(null)
@@ -227,6 +237,23 @@ onMounted(async () => {
     // terrainProvider: new Cesium.EllipsoidTerrainProvider(),  // 平坦地球，与 terrain 冲突（未启用）
     // maximumRenderTimeChange: Infinity,  // 按需渲染时间阈值，需配合 requestRenderMode（未启用）
   })
+
+  /* ----------------------------------------------------------------
+   * 隐藏 Cesium 右下角 credit 归属声明
+   * ----------------------------------------------------------------
+   * Cesium 默认在地图右下角显示数据来源 credit（如「CESIUM ION
+   * Upgrade for commercial use. Data attribution.」），这是 Cesium
+   * 对 ion 服务和底图瓦片供应商的强制归属要求。
+   *
+   * 处理方式：把 cesiumWidget.creditContainer 设为 display:none，
+   * 彻底隐藏。若需保留归属信息（如商业合规场景），可改为缩小/透明
+   * 而非 display:none。
+   *
+   * 注：showCreditsOnScreen: false 只是控制是否把 credit 显示在屏幕
+   *   上（而非点击展开），默认就是 false，但 credit 容器仍会渲染。
+   *   所以需要直接操作 DOM 才能真正隐藏。
+   */
+  viewer.value.cesiumWidget.creditContainer.style.display = 'none'
 
   /* ----------------------------------------------------------------
    * 2. 叠加国内地图瓦片（高德矢量道路图，含地名注记）
@@ -1402,6 +1429,13 @@ defineExpose({
   width: 100%;
   height: 100%;
   min-height: 400px;
+}
+
+/* 兜底：用 CSS 隐藏 Cesium credit 容器，防止 Cesium 内部重渲染
+   把 JS 设置的 display:none 覆盖（如地形异步加载完成后会重新插入 credit）。
+   :deep() 穿透 scoped 作用域匹配 Cesium 生成的内部 DOM。 */
+.cesium-map-container :deep(.cesium-viewer-bottom) {
+  display: none !important;
 }
 
 .custom-popup {

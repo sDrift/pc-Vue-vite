@@ -156,6 +156,7 @@ onMounted(async () => {
     const dynamicRoutes = await loadDynamicRoutes();
     // 把接口下发的动态路由追加到菜单末尾，触发响应式更新
     menuRoutes.value = [...staticChildren, ...dynamicRoutes];
+    console.log('动态路由加载成功:', dynamicRoutes);
   } catch (err) {
     console.error('动态路由加载失败:', err);
   }

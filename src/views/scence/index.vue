@@ -9,7 +9,7 @@
       <div class="header-right">
         <span class="time">{{ currentTime }}</span>
         <el-button type="primary" size="small" @click="refreshData">
-          <el-icon-refresh /> 刷新数据
+          <Refresh /> 刷新数据
         </el-button>
       </div>
     </header>
@@ -20,7 +20,7 @@
         <!-- 风险指标 -->
         <div class="panel-section">
           <div class="section-header">
-            <el-icon-alert-triangle class="section-icon" />
+            <Warning class="section-icon" />
             <span>风险指标</span>
           </div>
           <div class="risk-grid">
@@ -88,11 +88,15 @@
         <!-- 风险监控 -->
         <div class="panel-section">
           <div class="section-header">
-            <el-icon-monitor class="section-icon" />
+            <Monitor class="section-icon" />
             <span>风险监控</span>
           </div>
           <div class="monitor-tabs">
-            <el-tabs v-model="activeMonitorTab" type="card" @tab-change="handleMonitorTabChange">
+            <el-tabs
+              v-model="activeMonitorTab"
+              type="card"
+              @tab-change="handleMonitorTabChange"
+            >
               <el-tab-pane label="工程进度" name="progress">
                 <div class="progress-stats">
                   <span>工程进度 <strong>39个</strong></span>
@@ -129,7 +133,7 @@
         <!-- 日常巡查 -->
         <div class="panel-section">
           <div class="section-header">
-            <el-icon-calendar class="section-icon" />
+            <Calendar class="section-icon" />
             <span>日常巡查</span>
           </div>
           <div class="daily-tabs">
@@ -197,7 +201,7 @@
         <!-- 建设改造 -->
         <div class="panel-section">
           <div class="section-header">
-            <el-icon-hammer class="section-icon" />
+            <Tools class="section-icon" />
             <span>建设改造</span>
           </div>
           <div class="construction-info">
@@ -243,79 +247,173 @@
         <div class="map-container">
           <div class="map-legend">
             <div class="legend-item">
-              <span class="legend-color" style="background: #2d5a3d;"></span>
+              <span class="legend-color" style="background: #2d5a3d"></span>
               <span>低风险</span>
             </div>
             <div class="legend-item">
-              <span class="legend-color" style="background: #3d7a4d;"></span>
+              <span class="legend-color" style="background: #3d7a4d"></span>
               <span>中风险</span>
             </div>
             <div class="legend-item">
-              <span class="legend-color" style="background: #5d9a6d;"></span>
+              <span class="legend-color" style="background: #5d9a6d"></span>
               <span>高风险</span>
             </div>
             <div class="legend-item">
-              <span class="legend-color" style="background: #7db88d;"></span>
+              <span class="legend-color" style="background: #7db88d"></span>
               <span>极高风险</span>
             </div>
           </div>
           <div ref="mapRef" class="map-content">
             <svg viewBox="0 0 600 400" class="map-svg">
               <defs>
-                <linearGradient id="areaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient
+                  id="areaGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
+                >
                   <stop offset="0%" stop-color="#1a4d3a" />
                   <stop offset="100%" stop-color="#0d2d1f" />
                 </linearGradient>
               </defs>
               <!-- 地图区域 -->
-              <path d="M350,100 Q380,80 400,120 L420,140 Q440,160 430,180 L410,200 Q390,220 370,200 L350,180 Q330,160 340,140 Z" fill="url(#areaGradient)" stroke="#4ade80" stroke-width="1.5" class="map-area" />
+              <path
+                d="M350,100 Q380,80 400,120 L420,140 Q440,160 430,180 L410,200 Q390,220 370,200 L350,180 Q330,160 340,140 Z"
+                fill="url(#areaGradient)"
+                stroke="#4ade80"
+                stroke-width="1.5"
+                class="map-area"
+              />
               <text x="380" y="155" fill="#a8e6cf" font-size="12">渝北区</text>
-              
-              <path d="M380,200 Q420,180 450,220 L470,260 Q450,280 430,260 L400,240 Q380,220 390,200 Z" fill="#2d5a3d" stroke="#4ade80" stroke-width="1.5" class="map-area" />
-              <text x="420" y="235" fill="#a8e6cf" font-size="12">两江新区</text>
-              
-              <path d="M280,150 Q320,130 350,160 L370,190 Q350,210 320,190 L290,170 Q270,150 280,150 Z" fill="#3d7a4d" stroke="#4ade80" stroke-width="1.5" class="map-area" />
-              <text x="315" y="175" fill="#a8e6cf" font-size="11">沙坪坝区</text>
-              
-              <path d="M320,200 Q350,180 380,210 L400,240 Q370,260 340,240 L310,220 Q290,200 320,200 Z" fill="#3d7a4d" stroke="#4ade80" stroke-width="1.5" class="map-area" />
+
+              <path
+                d="M380,200 Q420,180 450,220 L470,260 Q450,280 430,260 L400,240 Q380,220 390,200 Z"
+                fill="#2d5a3d"
+                stroke="#4ade80"
+                stroke-width="1.5"
+                class="map-area"
+              />
+              <text x="420" y="235" fill="#a8e6cf" font-size="12">
+                两江新区
+              </text>
+
+              <path
+                d="M280,150 Q320,130 350,160 L370,190 Q350,210 320,190 L290,170 Q270,150 280,150 Z"
+                fill="#3d7a4d"
+                stroke="#4ade80"
+                stroke-width="1.5"
+                class="map-area"
+              />
+              <text x="315" y="175" fill="#a8e6cf" font-size="11">
+                沙坪坝区
+              </text>
+
+              <path
+                d="M320,200 Q350,180 380,210 L400,240 Q370,260 340,240 L310,220 Q290,200 320,200 Z"
+                fill="#3d7a4d"
+                stroke="#4ade80"
+                stroke-width="1.5"
+                class="map-area"
+              />
               <text x="345" y="225" fill="#a8e6cf" font-size="11">高新区</text>
-              
-              <path d="M350,260 Q380,240 410,270 L430,300 Q400,320 370,300 L340,280 Q320,260 350,260 Z" fill="#5d9a6d" stroke="#4ade80" stroke-width="1.5" class="map-area" />
-              <text x="375" y="285" fill="#a8e6cf" font-size="11">九龙坡区</text>
-              
-              <path d="M400,280 Q430,260 460,290 L480,320 Q450,340 420,320 L390,300 Q370,280 400,280 Z" fill="#2d5a3d" stroke="#4ade80" stroke-width="1.5" class="map-area" />
+
+              <path
+                d="M350,260 Q380,240 410,270 L430,300 Q400,320 370,300 L340,280 Q320,260 350,260 Z"
+                fill="#5d9a6d"
+                stroke="#4ade80"
+                stroke-width="1.5"
+                class="map-area"
+              />
+              <text x="375" y="285" fill="#a8e6cf" font-size="11">
+                九龙坡区
+              </text>
+
+              <path
+                d="M400,280 Q430,260 460,290 L480,320 Q450,340 420,320 L390,300 Q370,280 400,280 Z"
+                fill="#2d5a3d"
+                stroke="#4ade80"
+                stroke-width="1.5"
+                class="map-area"
+              />
               <text x="430" y="305" fill="#a8e6cf" font-size="11">南岸区</text>
-              
-              <path d="M420,320 Q450,300 480,330 L500,360 Q470,380 440,360 L410,340 Q390,320 420,320 Z" fill="#2d5a3d" stroke="#4ade80" stroke-width="1.5" class="map-area" />
+
+              <path
+                d="M420,320 Q450,300 480,330 L500,360 Q470,380 440,360 L410,340 Q390,320 420,320 Z"
+                fill="#2d5a3d"
+                stroke="#4ade80"
+                stroke-width="1.5"
+                class="map-area"
+              />
               <text x="455" y="345" fill="#a8e6cf" font-size="12">巴南区</text>
-              
-              <path d="M260,220 Q290,200 320,230 L340,260 Q310,280 280,260 L250,240 Q230,220 260,220 Z" fill="#5d9a6d" stroke="#4ade80" stroke-width="1.5" class="map-area" />
-              <text x="285" y="245" fill="#a8e6cf" font-size="11">大渡口区</text>
-              
-              <path d="M220,180 Q250,160 280,190 L300,220 Q270,240 240,220 L210,200 Q190,180 220,180 Z" fill="#5d9a6d" stroke="#4ade80" stroke-width="1.5" class="map-area" />
+
+              <path
+                d="M260,220 Q290,200 320,230 L340,260 Q310,280 280,260 L250,240 Q230,220 260,220 Z"
+                fill="#5d9a6d"
+                stroke="#4ade80"
+                stroke-width="1.5"
+                class="map-area"
+              />
+              <text x="285" y="245" fill="#a8e6cf" font-size="11">
+                大渡口区
+              </text>
+
+              <path
+                d="M220,180 Q250,160 280,190 L300,220 Q270,240 240,220 L210,200 Q190,180 220,180 Z"
+                fill="#5d9a6d"
+                stroke="#4ade80"
+                stroke-width="1.5"
+                class="map-area"
+              />
               <text x="245" y="205" fill="#a8e6cf" font-size="11">江北区</text>
-              
-              <path d="M180,150 Q210,130 240,160 L260,190 L230,210 Q200,230 170,200 L150,170 Q160,150 180,150 Z" fill="#3d7a4d" stroke="#4ade80" stroke-width="1.5" class="map-area" />
+
+              <path
+                d="M180,150 Q210,130 240,160 L260,190 L230,210 Q200,230 170,200 L150,170 Q160,150 180,150 Z"
+                fill="#3d7a4d"
+                stroke="#4ade80"
+                stroke-width="1.5"
+                class="map-area"
+              />
               <text x="200" y="180" fill="#a8e6cf" font-size="10">渝中区</text>
-              
+
               <!-- 风险点标记 -->
               <circle cx="250" cy="195" r="6" fill="#ef4444" class="risk-point">
-                <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" />
+                <animate
+                  attributeName="opacity"
+                  values="1;0.5;1"
+                  dur="2s"
+                  repeatCount="indefinite"
+                />
               </circle>
               <circle cx="380" cy="225" r="5" fill="#f97316" class="risk-point">
-                <animate attributeName="opacity" values="1;0.5;1" dur="2.5s" repeatCount="indefinite" />
+                <animate
+                  attributeName="opacity"
+                  values="1;0.5;1"
+                  dur="2.5s"
+                  repeatCount="indefinite"
+                />
               </circle>
               <circle cx="420" cy="285" r="4" fill="#eab308" class="risk-point">
-                <animate attributeName="opacity" values="1;0.5;1" dur="3s" repeatCount="indefinite" />
+                <animate
+                  attributeName="opacity"
+                  values="1;0.5;1"
+                  dur="3s"
+                  repeatCount="indefinite"
+                />
               </circle>
               <circle cx="320" cy="245" r="5" fill="#ef4444" class="risk-point">
-                <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" />
+                <animate
+                  attributeName="opacity"
+                  values="1;0.5;1"
+                  dur="2s"
+                  repeatCount="indefinite"
+                />
               </circle>
             </svg>
           </div>
           <div class="layer-control">
             <el-button type="text" @click="toggleLayer">
-              <el-icon-layers /> 图层管理
+              <Files /> 图层管理
             </el-button>
           </div>
         </div>
@@ -324,21 +422,21 @@
         <div class="bottom-controls">
           <div class="left-controls">
             <el-button type="primary" @click="exportData">
-              <el-icon-download /> 组件中心
+              <Download /> 组件中心
             </el-button>
             <el-button type="primary" @click="reportCenter">
-              <el-icon-file-text /> 事件中心
+              <Document /> 事件中心
             </el-button>
           </div>
           <div class="right-controls">
             <el-button type="success" @click="smartAssist">
-              <el-icon-brain /> 智能助手
+              <Cpu /> 智能助手
             </el-button>
             <el-button type="success" @click="smartAnalysis">
-              <el-icon-bar-chart /> 智能分析
+              <DataLine /> 智能分析
             </el-button>
             <el-button type="primary" @click="exportReport">
-              <el-icon-printer /> 导出报告
+              <Printer /> 导出报告
             </el-button>
           </div>
         </div>
@@ -349,7 +447,7 @@
         <!-- 内涝预警 -->
         <div class="panel-section">
           <div class="section-header">
-            <el-icon-bell class="section-icon" />
+            <Bell class="section-icon" />
             <span>内涝预警</span>
             <div class="header-right">
               <span>预警等级</span>
@@ -373,7 +471,11 @@
             </div>
           </div>
           <div class="region-tabs">
-            <el-tabs v-model="activeRegionTab" type="card" :tab-position="'left'">
+            <el-tabs
+              v-model="activeRegionTab"
+              type="card"
+              :tab-position="'left'"
+            >
               <el-tab-pane label="区域(10)" name="region1">
                 <div class="region-content">
                   <div class="region-item">
@@ -413,7 +515,7 @@
         <!-- 泵站信息 -->
         <div class="panel-section">
           <div class="section-header">
-            <el-icon-droplet class="section-icon" />
+            <Setting class="section-icon" />
             <span>泵站信息</span>
           </div>
           <div class="pump-tabs">
@@ -447,7 +549,7 @@
         <!-- 内涝溯源 -->
         <div class="panel-section">
           <div class="section-header">
-            <el-icon-search class="section-icon" />
+            <Search class="section-icon" />
             <span>内涝溯源</span>
           </div>
           <div class="trace-stats">
@@ -469,19 +571,27 @@
         <!-- 城市道路 -->
         <div class="panel-section">
           <div class="section-header">
-            <el-icon-map class="section-icon" />
+            <MapLocation class="section-icon" />
             <span>城市道路</span>
           </div>
           <div class="road-info">
             <div class="road-item">
-              <img src="https://neeko-copilot.bytedance.net/api/text2image?prompt=urban%20road%20flood%20monitoring%20camera%20view&image_size=portrait_4_3" alt="道路监控" class="road-image" />
+              <img
+                src="https://neeko-copilot.bytedance.net/api/text2image?prompt=urban%20road%20flood%20monitoring%20camera%20view&image_size=portrait_4_3"
+                alt="道路监控"
+                class="road-image"
+              />
               <div class="road-desc">
                 <span>两江新区石门马河沟道路监控</span>
                 <span class="road-time">更新时间: 2024-07-27 15:25:18</span>
               </div>
             </div>
             <div class="road-item">
-              <img src="https://neeko-copilot.bytedance.net/api/text2image?prompt=urban%20street%20camera%20view%20clear%20weather&image_size=portrait_4_3" alt="道路监控" class="road-image" />
+              <img
+                src="https://neeko-copilot.bytedance.net/api/text2image?prompt=urban%20street%20camera%20view%20clear%20weather&image_size=portrait_4_3"
+                alt="道路监控"
+                class="road-image"
+              />
               <div class="road-desc">
                 <span>两江新区南桥寺道路监控</span>
                 <span class="road-time">更新时间: 2024-07-27 15:24:59</span>
@@ -493,7 +603,7 @@
         <!-- 内涝处置 -->
         <div class="panel-section">
           <div class="section-header">
-            <el-icon-wrench class="section-icon" />
+            <Operation class="section-icon" />
             <span>内涝处置</span>
           </div>
           <div class="disposal-stats">
@@ -518,7 +628,7 @@
         <!-- 事件详情 -->
         <div class="panel-section">
           <div class="section-header">
-            <el-icon-info class="section-icon" />
+            <InfoFilled class="section-icon" />
             <span>事件详情</span>
           </div>
           <div class="event-content">
@@ -529,7 +639,7 @@
         <!-- 雨天数据 -->
         <div class="panel-section">
           <div class="section-header">
-            <el-icon-cloud-rain class="section-icon" />
+            <Cloudy class="section-icon" />
             <span>雨天数据</span>
           </div>
           <div class="rainy-content">
@@ -550,73 +660,65 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import * as ElementPlusIconsVue from '@element-plus/icons-vue';
-
-// 注册图标 - 使用项目中已确认可用的图标
-const icons = {
-  'el-icon-alert-triangle': ElementPlusIconsVue.Warning,
-  'el-icon-monitor': ElementPlusIconsVue.DataLine,
-  'el-icon-calendar': ElementPlusIconsVue.Calendar,
-  'el-icon-hammer': ElementPlusIconsVue.ShoppingCart,
-  'el-icon-refresh': ElementPlusIconsVue.Refresh,
-  'el-icon-layers': ElementPlusIconsVue.DocumentCopy,
-  'el-icon-download': ElementPlusIconsVue.Download,
-  'el-icon-file-text': ElementPlusIconsVue.DataAnalysis,
-  'el-icon-brain': ElementPlusIconsVue.Cpu,
-  'el-icon-bar-chart': ElementPlusIconsVue.PieChart,
-  'el-icon-printer': ElementPlusIconsVue.Printer,
-  'el-icon-bell': ElementPlusIconsVue.Bell,
-  'el-icon-droplet': ElementPlusIconsVue.Money,
-  'el-icon-search': ElementPlusIconsVue.Search,
-  'el-icon-map': ElementPlusIconsVue.MapLocation,
-  'el-icon-wrench': ElementPlusIconsVue.Setting,
-  'el-icon-info': ElementPlusIconsVue.Goods,
-  'el-icon-cloud-rain': ElementPlusIconsVue.DataLine
-};
+import { ref, onMounted, onUnmounted } from "vue";
+// Element Plus 图标已在 main.js 全局注册（PascalCase），模板直接用 <Bell /> 即可
 
 // 当前时间
-const currentTime = ref('');
+const currentTime = ref("");
 
 // 标签页状态
-const activeMonitorTab = ref('progress');
-const activeDailyTab = ref('today');
-const activeRegionTab = ref('region1');
-const activePumpTab = ref('level1');
-const warningLevel = ref('normal');
+const activeMonitorTab = ref("progress");
+const activeDailyTab = ref("today");
+const activeRegionTab = ref("region1");
+const activePumpTab = ref("level1");
+const warningLevel = ref("normal");
 
 // 数据列表
 const projectList = ref([
-  { name: '巴南区花溪河沿线排水管网整治工程(一期)', region: '巴南区', person: '王五' },
-  { name: '南岸区茶园大道管网二期雨污分流改造', region: '南岸区', person: '赵六' },
-  { name: '江北区五里店雨污分流管网改造工程', region: '江北区', person: '钱七' },
-  { name: '渝北区空港新城雨污分流管网改造', region: '渝北区', person: '孙八' },
-  { name: '北碚区同兴园区雨污分流改造工程', region: '北碚区', person: '周九' }
+  {
+    name: "巴南区花溪河沿线排水管网整治工程(一期)",
+    region: "巴南区",
+    person: "王五",
+  },
+  {
+    name: "南岸区茶园大道管网二期雨污分流改造",
+    region: "南岸区",
+    person: "赵六",
+  },
+  {
+    name: "江北区五里店雨污分流管网改造工程",
+    region: "江北区",
+    person: "钱七",
+  },
+  { name: "渝北区空港新城雨污分流管网改造", region: "渝北区", person: "孙八" },
+  { name: "北碚区同兴园区雨污分流改造工程", region: "北碚区", person: "周九" },
 ]);
 
 const hiddenList = ref([
-  { name: '沙坪坝区某路段积水隐患', region: '沙坪坝区', status: '整治中' },
-  { name: '九龙坡区某小区排水问题', region: '九龙坡区', status: '整治中' },
-  { name: '大渡口区某道路管网堵塞', region: '大渡口区', status: '已完工' }
+  { name: "沙坪坝区某路段积水隐患", region: "沙坪坝区", status: "整治中" },
+  { name: "九龙坡区某小区排水问题", region: "九龙坡区", status: "整治中" },
+  { name: "大渡口区某道路管网堵塞", region: "大渡口区", status: "已完工" },
 ]);
 
 const historyList = ref([
-  { name: '渝中区解放碑区域管网改造', region: '渝中区', time: '2024-06-15' },
-  { name: '南岸区南坪商圈排水整治', region: '南岸区', time: '2024-06-10' },
-  { name: '江北区观音桥管网修复', region: '江北区', time: '2024-06-05' }
+  { name: "渝中区解放碑区域管网改造", region: "渝中区", time: "2024-06-15" },
+  { name: "南岸区南坪商圈排水整治", region: "南岸区", time: "2024-06-10" },
+  { name: "江北区观音桥管网修复", region: "江北区", time: "2024-06-05" },
 ]);
 
 // 更新时间
 const updateTime = () => {
   const now = new Date();
-  currentTime.value = now.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  }).replace(/\//g, '-');
+  currentTime.value = now
+    .toLocaleString("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    })
+    .replace(/\//g, "-");
 };
 
 // 刷新数据
@@ -686,7 +788,12 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 30px;
-  background: linear-gradient(90deg, rgba(0, 64, 128, 0.6) 0%, rgba(0, 80, 160, 0.4) 50%, rgba(0, 64, 128, 0.6) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 64, 128, 0.6) 0%,
+    rgba(0, 80, 160, 0.4) 50%,
+    rgba(0, 64, 128, 0.6) 100%
+  );
   border-bottom: 1px solid rgba(45, 180, 255, 0.3);
 }
 
@@ -717,7 +824,7 @@ onMounted(() => {
 .time {
   font-size: 16px;
   color: #a8e6cf;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 /* 主内容区 */
@@ -755,6 +862,8 @@ onMounted(() => {
 }
 
 .section-icon {
+  width: 20px;
+  height: 20px;
   margin-right: 8px;
   color: #00d4ff;
 }
@@ -818,18 +927,21 @@ onMounted(() => {
 }
 
 /* 监控表格 */
-.monitor-tabs, .daily-tabs {
+.monitor-tabs,
+.daily-tabs {
   padding: 8px;
 }
 
-.progress-stats, .hidden-stats {
+.progress-stats,
+.hidden-stats {
   display: flex;
   gap: 20px;
   padding: 8px;
   color: #8892a6;
 }
 
-.progress-stats strong, .hidden-stats strong {
+.progress-stats strong,
+.hidden-stats strong {
   color: #00d4ff;
 }
 
@@ -1008,7 +1120,8 @@ onMounted(() => {
   justify-content: space-between;
 }
 
-.left-controls, .right-controls {
+.left-controls,
+.right-controls {
   display: flex;
   gap: 10px;
 }
@@ -1276,7 +1389,8 @@ onMounted(() => {
   font-size: 12px;
 }
 
-.el-table td, .el-table th {
+.el-table td,
+.el-table th {
   border-bottom: 1px solid rgba(45, 180, 255, 0.1);
 }
 
