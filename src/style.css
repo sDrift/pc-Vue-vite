@@ -1,0 +1,147 @@
+/* 全局样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-size: 14px;
+  
+  /* 颜色变量 */
+  --primary-color: #409eff;
+  --success-color: #67c23a;
+  --warning-color: #e6a23c;
+  --danger-color: #f56c6c;
+  --info-color: #909399;
+  --text-color: #303133;
+  --text-color-secondary: #606266;
+  --text-color-placeholder: #909399;
+  --border-color: #dcdfe6;
+  --border-color-light: #e4e7ed;
+  --background-color: #f5f7fa;
+  
+  /* 动画变量 */
+  --transition-time: 0.3s;
+  
+  /* 阴影变量 */
+  --box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  --box-shadow-light: 0 1px 4px rgba(0, 0, 0, 0.08);
+  
+  /* 其他全局变量 */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 基础标签样式 */
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 链接样式 */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  color: #66b1ff;
+}
+
+/* 按钮基础样式重置 */
+button {
+  font-family: inherit;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* 输入框基础样式重置 */
+input, textarea, select {
+  font-family: inherit;
+  outline: none;
+}
+
+/* 表格基础样式重置 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* 列表基础样式重置 */
+ul, ol {
+  list-style: none;
+}
+
+/* 标题基础样式 */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.2;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.card {
+  padding: 2em;
+}
+
+#app {
+  /* max-width: 1280px; */
+  margin: 0 auto;
+  /* padding: 2rem; */
+  text-align: center;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
