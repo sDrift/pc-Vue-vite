@@ -101,6 +101,16 @@ export default defineConfig(({ mode }) => {
           ws: true,
           changeOrigin: true,
         },
+        /* Cesium Sandcastle 公开示例资源代理：dev 时把 /cesium-samples/*
+           转发到 https://sandcastle.cesium.com/SampleData/*，
+           避免浏览器 CORS 拦截（该站点未发 Access-Control-Allow-Origin）。
+           仅用于演示加载飞机等公开示例 glb；生产环境请下载到 public/ 自托管。 */
+        '/cesium-samples': {
+          target: 'https://sandcastle.cesium.com',
+          changeOrigin: true,
+          rewrite: (p) => p.replace(/^\/cesium-samples/, '/SampleData'),
+          secure: true,
+        },
       },
     },
 

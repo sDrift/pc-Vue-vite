@@ -59,25 +59,25 @@ const routes = [
       },
 
       // 城市内涝治理
-      {
-        path: 'scence',
-        name: 'Scence',
-        component: () => import('../views/scence/index.vue'),
-        meta: {
-          title: '城市内涝治理',
-          icon: 'el-icon-cloud-rain'
-        }
-      },
+      // {
+      //   path: 'scence',
+      //   name: 'Scence',
+      //   component: () => import('../views/scence/index.vue'),
+      //   meta: {
+      //     title: '城市内涝治理',
+      //     icon: 'el-icon-cloud-rain'
+      //   }
+      // },
       // 内涝预警表格
-      {
-        path: 'waterlogging-table',
-        name: 'WaterloggingTable',
-        component: () => import('../views/scence/WaterloggingTable.vue'),
-        meta: {
-          title: '内涝预警表格',
-          icon: 'el-icon-data-table'
-        }
-      }
+      // {
+      //   path: 'waterlogging-table',
+      //   name: 'WaterloggingTable',
+      //   component: () => import('../views/scence/WaterloggingTable.vue'),
+      //   meta: {
+      //     title: '内涝预警表格',
+      //     icon: 'el-icon-data-table'
+      //   }
+      // }
     ]
   },
   {

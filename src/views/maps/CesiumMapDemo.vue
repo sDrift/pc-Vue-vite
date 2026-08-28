@@ -44,6 +44,22 @@
         </button>
         <span class="demo-tip">需先「批量添加点位」，停止统一用「停止批量点位帧更新」</span>
       </div>
+      <!-- 3D 模型演示：调用 cesiumModels.js 工具模块（独立于 CesiumMap 组件） -->
+      <div class="demo-actions">
+        <button class="demo-btn" @click="handleLoad3DBuildings">
+          加载建筑白模（ion OSM）
+        </button>
+        <button class="demo-btn" @click="handleRemove3DBuildings">
+          移除建筑白模
+        </button>
+        <button class="demo-btn" @click="handleLoadAircraft">
+          加载飞机模型（ion 资产）
+        </button>
+        <button class="demo-btn" @click="handleRemoveAircraft">
+          移除飞机模型
+        </button>
+        <span class="demo-tip">依赖 ion token（见 .env VITE_CESIUM_ION_TOKEN）</span>
+      </div>
       <div class="demo-actions">
         <div v-for="m in markers" :key="m.name">
           <button class="demo-btn" @click="handleAddMarker(m)">
@@ -67,8 +83,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import CesiumMap from '@/components/CesiumMap.vue'
+import {
+  load3DTileset,
+  remove3DTileset,
+  loadModel,
+  removeModel,
+  clearAllModels,
+  flyToObject,
+} from '@/utils/cesiumModels.js'
 
 /* mapRef 引用 CesiumMap 组件实例，通过它调用 defineExpose 暴露的方法
    （viewer / addMarker）。 */
@@ -220,6 +244,78 @@ const handleStartPathFollow = () => {
     ],
   })
 }
+
+/* ==================== 3D 模型演示 ====================
+ * 调用 src/utils/cesiumModels.js（独立工具模块，不写进 CesiumMap.vue）。
+ * 通过 mapRef.value.viewer 拿到 Cesium Viewer 实例传入。
+ * 资产：ion OSM Buildings（assetId 96188）+ Cesium Air 飞机（assetId 12552）。
+ * 注意：依赖 VITE_CESIUM_ION_TOKEN，未配置时 ion 资产加载会失败。
+ */
+const BUILDINGS_TAG = 'chongqing-buildings'
+const AIRCRAFT_TAG = 'chongqing-aircraft'
+
+/* 加载 3D Tiles：ion OSM Buildings（全球建筑白模，按瓦片按需加载） */
+const handleLoad3DBuildings = async () => {
+  if (!mapRef.value?.viewer) return
+  const tileset = await load3DTileset(mapRef.value.viewer, {
+    tag: BUILDINGS_TAG,
+    assetId: 96188,             // Cesium OSM Buildings
+    heightOffset: 0,           // 重庆地形与建筑基准基本对齐，保持 0
+    maximumScreenSpaceError: 16,
+    /* GCJ-02 偏移：底图是高德（GCJ-02），OSM Buildings 是 WGS-84，
+     * 用解放碑做参考点整体平移，让参考点附近（重庆主城）的建筑跟
+     * 高德道路底图对齐。远离主城的区域有少量二次偏差。 */
+    applyGcj02: true,
+    referenceLongitude: 106.5781,   // 解放碑
+    referenceLatitude: 29.5486,
+  })
+  if (tileset) flyToObject(mapRef.value.viewer, tileset, {
+    height: 2000,
+    heading: 0,                    // 朝正北
+    pitch: -60,                    // 陡俯视，60 度看建筑群更立体
+    fallbackLongitude: 106.5781,   // 重庆解放碑
+    fallbackLatitude: 29.5486,
+  })
+}
+
+const handleRemove3DBuildings = () => {
+  if (!mapRef.value?.viewer) return
+  remove3DTileset(mapRef.value.viewer, BUILDINGS_TAG)
+}
+
+/* 加载单个 glTF 模型：用本地 glb 文件
+ * Cesium_Air.glb 已下载到 public/cesium/Assets/ 下，直接用本地路径
+ * 不依赖代理和 ion。改用 Entity 形式加载（cesiumModels.js 内部），
+ * 避开 Model primitive 在 1.144 上对老 glb 的兼容问题。 */
+const handleLoadAircraft = async () => {
+  if (!mapRef.value?.viewer) return
+  const model = await loadModel(mapRef.value.viewer, {
+    tag: AIRCRAFT_TAG,
+    url: '/cesium/Assets/Cesium_Air.glb',
+    longitude: 106.5781,        // 解放碑
+    latitude: 29.5486,
+    height: 500,                // 上空 500 米
+    scale: 5,                   // 调小：原 50 太大，5 大约真实飞机尺寸（25m 翼展）
+    heading: 90,                // 朝东
+  })
+  if (model) flyToObject(mapRef.value.viewer, model, {
+    height: 3500,
+    heading: 90,                   // 朝东（跟飞机朝向一致）
+    pitch: -45,                    // 斜俯视，能同时看到飞机和地面
+  })
+}
+
+const handleRemoveAircraft = () => {
+  if (!mapRef.value?.viewer) return
+  removeModel(mapRef.value.viewer, AIRCRAFT_TAG)
+}
+
+/* 页面卸载时清理所有 3D 模型，防止 primitives 堆积 */
+onUnmounted(() => {
+  if (mapRef.value?.viewer) {
+    clearAllModels(mapRef.value.viewer)
+  }
+})
 </script>
 
 <style scoped>
