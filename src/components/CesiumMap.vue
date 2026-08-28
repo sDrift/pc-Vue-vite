@@ -124,6 +124,45 @@ let batchFrameUpdateHandler = null
 
 // let markerImage = '@/assets/vue.svg'
 
+/* ----------------------------------------------------------------
+ * 坐标修正：补偿祖先 transform: scale 导致的点击命中错位
+ * ----------------------------------------------------------------
+ * 原理：
+ *   ScreenSpaceEventHandler 回调传入的 position/endPosition，是 Cesium 内部
+ *   用 canvas.getBoundingClientRect() 计算的「视觉坐标」。
+ *   当存在祖先 transform: scale(sx, sy) 时：
+ *     - rect.width = clientWidth * sx   （视觉上被放大/缩小）
+ *     - ScreenSpaceEventHandler.position.x ∈ [0, clientWidth*sx]
+ *     - 但 Scene.pick() 需要的视口坐标范围是 [0, clientWidth]
+ *     - 两者比例不对 → 命中错位：scale>1 时命中偏右下，scale<1 时偏左上
+ *
+ *   修复：
+ *     传入 pick 前将视觉坐标除以 (sx, sy) 压缩回视口坐标。
+ *
+ *   说明：弹窗跟随（worldToWindowCoordinates + position:absolute）
+ *     不需要修正，因为弹窗 DOM 和 canvas 都处于同一 scale 祖先下，
+ *     两者视觉坐标均按同比例变换，相对位置保持一致。
+ */
+function getCanvasScale() {
+  if (!viewer.value) return { sx: 1, sy: 1 }
+  const canvas = viewer.value.scene.canvas
+  if (!canvas) return { sx: 1, sy: 1 }
+  const rect = canvas.getBoundingClientRect()
+  const cssWidth = canvas.clientWidth || 1
+  const cssHeight = canvas.clientHeight || 1
+  return {
+    sx: rect.width / cssWidth,
+    sy: rect.height / cssHeight,
+  }
+}
+
+/* 把「视觉坐标（ScreenSpaceEventHandler 回调给的）」→「Cesium 渲染视口坐标」 */
+function toViewportPosition(screenPos) {
+  if (!screenPos) return screenPos
+  const { sx, sy } = getCanvasScale()
+  return new Cesium.Cartesian2(screenPos.x / sx, screenPos.y / sy)
+}
+
 onMounted(async () => {
   /* ----------------------------------------------------------------
    * 1. 初始化 Viewer（Cesium 的核心入口）
@@ -272,10 +311,14 @@ onMounted(async () => {
   * - 移出点位：恢复原大小。
   */
   screenSpaceHandler.setInputAction((event) => {
-    updateHoverMarker(event.endPosition)
+    /* 坐标修正：祖先存在 transform: scale 时必须先从视觉坐标转视口坐标 */
+    updateHoverMarker(toViewportPosition(event.endPosition))
   }, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
   screenSpaceHandler.setInputAction((event) => {
-    const picked = viewer.value.scene.pick(event.position)
+    /* 坐标修正：祖先存在 transform: scale 时必须先从视觉坐标转视口坐标 */
+    const picked = viewer.value.scene.pick(
+      toViewportPosition(event.position),
+    )
 
     if (!Cesium.defined(picked)) {
       closePopup()

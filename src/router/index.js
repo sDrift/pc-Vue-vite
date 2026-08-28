@@ -1,6 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { getDynamicRoutes } from '../api/menu.js';
+import { buildRoutes } from './dynamic.js';
 
-// 定义路由
+/* ------------------------------------------------------------------
+ * 静态路由
+ * ------------------------------------------------------------------
+ * 只放「任何用户进来都一定有」的基础路由：
+ *   - Layout 外壳（含 Dashboard / Users / Products / Settings /
+ *     Scence / WaterloggingTable 等基础菜单）
+ *   - 登录页、404 兜底
+ *
+ * 「图表相关 / 测试功能 / 地图相关 / AI相关」改为接口下发，
+ *   见 src/api/menu.js，由 loadDynamicRoutes() 注入。
+ */
 const routes = [
   {
     path: '/',
@@ -45,207 +57,7 @@ const routes = [
           icon: 'el-icon-setting'
         }
       },
-      
-      // 图表相关
-      {
-        path: 'charts',
-        name: 'Charts',
-        meta: {
-          title: '图表演示',
-          icon: 'el-icon-pie-chart'
-        },
-        children: [
-          {
-            path: 'chart-demo',
-            name: 'ChartDemo',
-            component: () => import('../views/charts/ChartDemo.vue'),
-            meta: {
-              title: '3D饼图演示'
-            }
-          },
-          {
-            path: 'enhanced-chart-demo',
-            name: 'EnhancedChartDemo',
-            component: () => import('../views/charts/EnhancedChartDemo.vue'),
-            meta: {
-              title: '增强版3D饼图'
-            }
-          },
-          {
-            path: 'three-d-pie-chart',
-            name: 'ThreeDPieChart',
-            component: () => import('../views/charts/ThreeDPieChartView.vue'),
-            meta: {
-              title: '自定义3D饼图'
-            }
-          },
-          {
-            path: 'three-d-demo',
-            name: 'ThreeDDemo',
-            component: () => import('../views/charts/ThreeDDemo.vue'),
-            meta: {
-              title: '3D可视化演示'
-            }
-          },
-          {
-            path: 'three-js-demo',
-            name: 'ThreeJsDemo',
-            component: () => import('../views/charts/ThreeJsDemo.vue'),
-            meta: {
-              title: 'Three.js 3D演示'
-            }
-          },
-          {
-            path: 'particles-demo',
-            name: 'ParticlesDemo',
-            component: () => import('../views/charts/ParticlesDemo.vue'),
-            meta: {
-              title: 'Three.js 粒子系统'
-            }
-          },
-          {
-            path: 'character-demo',
-            name: 'CharacterDemo',
-            component: () => import('../views/charts/CharacterDemo.vue'),
-            meta: {
-              title: '3D 人物模型'
-            }
-          }
-        ]
-      },
-      
-      // 测试功能
-      {
-        path: 'tests',
-        name: 'Tests',
-        meta: {
-          title: '测试功能',
-          icon: 'el-icon-document-copy'
-        },
-        children: [
-          // 下划线动画演示
-          {
-            path: 'underline-animation',
-            name: 'UnderlineAnimation',
-            component: () => import('../components/UnderlineAnimation.vue'),
-            meta: {
-              title: '下划线动画演示'
-            }
-          },
-          {
-            path: 'underline-animation-test',
-            name: 'UnderlineAnimationTest',
-            component: () => import('@/views/test/UnderlineAnimationTest.vue'),
-            meta: {
-              title: '下划线动画测试'
-            }
-          },
-          {
-            path: 'blank-test',
-            name: 'BlankTest',
-            component: () => import('@/views/test/BlankTest.vue'),
-            meta: {
-              title: '空白测试页面'
-            }
-          },
-          {
-            path: 'calendar-test',
-            name: 'CalendarTest',
-            component: () => import('../views/test/CalendarTest.vue'),
-            meta: {
-              title: '日历测试页面'
-            }
-          },
-          {
-            path: 'async-loader-test',
-            name: 'AsyncLoaderTest',
-            component: () => import('../views/test/AsyncLoaderTest.vue'),
-            meta: {
-              title: '异步组件按需加载测试'
-            }
-          },
-          {
-            path: 'dynamic-form-test',
-            name: 'DynamicFormTest',
-            component: () => import('../views/test/DynamicFormTest.vue'),
-            meta: {
-              title: '动态表单生成器'
-            }
-          }
-        ]
-      },
-      
-      // 地图相关
-      {
-        path: 'maps',
-        name: 'Maps',
-        meta: {
-          title: '地图功能',
-          icon: 'el-icon-map-location'
-        },
-        children: [
-          {
-            path: 'map-demo',
-            name: 'MapDemo',
-            component: () => import('../views/maps/MapDemo.vue'),
-            meta: {
-              title: '地图演示'
-            }
-          },
-          {
-            path: 'china-map',
-            name: 'ChinaMap',
-            component: () => import('../views/maps/ChinaMapView.vue'),
-            meta: {
-              title: '中国地图'
-            }
-          },
-          {
-            path: 'new-china-map',
-            name: 'NewChinaMap',
-            component: () => import('../views/maps/NewChianMapView.vue'),
-            meta: {
-              title: '新版中国地图'
-            }
-          },
-          {
-            path: 'network-flow-map',
-            name: 'NetworkFlowMap',
-            component: () => import('../views/maps/NetworkFlowMapView.vue'),
-            meta: {
-              title: '网络流量地图'
-            }
-          },
-          {
-            path: 'olmap-demo',
-            name: 'OLMapDemo',
-            component: () => import('../views/maps/OLMapDemo.vue'),
-            meta: {
-              title: 'OLMap方法演示'
-            }
-          },
-          {
-            path: 'cesium-demo',
-            name: 'CesiumMapDemo',
-            component: () => import('../views/maps/CesiumMapDemo.vue'),
-            meta: {
-              title: 'Cesium地图演示'
-            }
-          }
-        ]
-      },
-      
-      // AI相关
-      {
-        path: 'ai-demo',
-        name: 'AIDemo',
-        component: () => import('../views/ai/AIDemo.vue'),
-        meta: {
-          title: 'AI演示',
-          icon: 'el-icon-cpu'
-        }
-      },
-      
+
       // 城市内涝治理
       {
         path: 'scence',
@@ -291,6 +103,45 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 });
+
+/* 动态路由是否已加载（幂等控制，避免重复注入） */
+let dynamicRoutesLoaded = false
+
+/* 最近一次注入的动态路由（解析后的 vue-router 格式），供 Layout 渲染菜单 */
+let lastInjectedRoutes = []
+
+/*
+ * 拉取接口并注入动态路由。
+ *
+ * 流程：
+ *   1. 调 getDynamicRoutes() 拿到「字符串 component」的路由数据
+ *   2. 用 buildRoutes() 把字符串路径解析成懒加载函数
+ *   3. 逐条 router.addRoute('Layout', route) 注入到 Layout 的 children
+ *   4. 标记已加载，返回注入后的路由供菜单使用
+ *
+ * 幂等：已加载过则直接返回上次结果，避免重复 addRoute 导致
+ * 「NavigationDuplicated」或路由表膨胀。
+ */
+export async function loadDynamicRoutes() {
+  if (dynamicRoutesLoaded) return lastInjectedRoutes
+
+  const rawRoutes = await getDynamicRoutes()
+  const resolved = buildRoutes(rawRoutes)
+
+  resolved.forEach((route) => {
+    router.addRoute('Layout', route)
+  })
+
+  lastInjectedRoutes = resolved
+  dynamicRoutesLoaded = true
+  return resolved
+}
+
+/* 重置动态路由（登出时调用，清掉已注入的菜单并允许下次重新加载） */
+export function resetDynamicRoutes() {
+  dynamicRoutesLoaded = false
+  lastInjectedRoutes = []
+}
 
 // 路由守卫
 router.beforeEach((to, from, next) => {

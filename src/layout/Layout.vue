@@ -10,7 +10,7 @@
         @select="handleMenuSelect"
         router
       >
-        <template v-for="route in routes" :key="route.path">
+        <template v-for="route in menuRoutes" :key="route.path">
           <!-- 无子菜单的路由 -->
           <el-menu-item
             v-if="!route.children || route.children.length === 0"
@@ -72,6 +72,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '../store/modules/user';
 import { Menu, User } from '@element-plus/icons-vue';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
+import { loadDynamicRoutes, resetDynamicRoutes } from '../router/index.js';
 // 确保所有必要的Element Plus图标都已注册
 
 // 注册Element Plus图标
@@ -85,7 +86,8 @@ const icons = {
   'el-icon-cpu': ElementPlusIconsVue.Cpu,
   'el-icon-pie-chart': ElementPlusIconsVue.PieChart,
   'el-icon-document-copy': ElementPlusIconsVue.DocumentCopy,
-  'el-icon-cloud-rain': ElementPlusIconsVue.DataLine
+  'el-icon-cloud-rain': ElementPlusIconsVue.DataLine,
+  'el-icon-data-table': ElementPlusIconsVue.DataLine,
 };
 
 // 创建组件对象
@@ -99,7 +101,8 @@ const components = {
   'el-icon-cpu': icons['el-icon-cpu'],
   'el-icon-pie-chart': icons['el-icon-pie-chart'],
   'el-icon-document-copy': icons['el-icon-document-copy'],
-  'el-icon-cloud-rain': icons['el-icon-cloud-rain']
+  'el-icon-cloud-rain': icons['el-icon-cloud-rain'],
+  'el-icon-data-table': icons['el-icon-data-table'],
 };
 
 // 获取路由和用户store
@@ -110,10 +113,13 @@ const userStore = useUserStore();
 // 侧边栏状态
 const isSidebarOpen = ref(true);
 
-// 从路由中获取子路由
-const routes = computed(() => {
-  return router.options.routes.find(r => r.name === 'Layout')?.children || [];
-});
+/*
+ * 菜单数据：静态基础路由 + 动态接口下发的路由。
+ * 初始化时先放静态基础路由（Dashboard/Users/Products/Settings/...），
+ * onMounted 里拉取动态路由后追加到数组末尾，触发菜单响应式更新。
+ */
+const staticChildren = router.options.routes.find(r => r.name === 'Layout')?.children || [];
+const menuRoutes = ref([...staticChildren]);
 
 // 当前激活的菜单
 const activeMenu = computed(() => {
@@ -138,12 +144,21 @@ const handleMenuSelect = (index) => {
 // 处理登出
 const handleLogout = () => {
   userStore.logout();
+  resetDynamicRoutes();      // 清掉动态路由加载标记，下次登录重新拉接口
+  menuRoutes.value = [];    // 清空菜单，避免登出后菜单残留
   router.push('/login');
 };
 
-// 组件挂载时加载用户信息
-onMounted(() => {
+// 组件挂载时加载用户信息 + 拉取动态路由
+onMounted(async () => {
   userStore.loadUserInfo();
+  try {
+    const dynamicRoutes = await loadDynamicRoutes();
+    // 把接口下发的动态路由追加到菜单末尾，触发响应式更新
+    menuRoutes.value = [...staticChildren, ...dynamicRoutes];
+  } catch (err) {
+    console.error('动态路由加载失败:', err);
+  }
 });
 </script>
 
