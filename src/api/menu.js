@@ -117,6 +117,12 @@ const DYNAMIC_ROUTES = [
         component: 'views/test/DynamicFormTest.vue',
         meta: { title: '动态表单生成器' },
       },
+      {
+        path: 'playground',
+        name: 'Playground',
+        component: 'views/test/Playground.vue',
+        meta: { title: '空白沙盒（草稿页）' },
+      },
     ],
   },
   {
