@@ -33,6 +33,7 @@ import pluginVue from 'eslint-plugin-vue'
 import prettierPlugin from 'eslint-plugin-prettier/recommended'
 import importX from 'eslint-plugin-import-x'
 import stylistic from '@stylistic/eslint-plugin'
+import tsParser from '@typescript-eslint/parser'
 
 export default [
   /* ========================================================================
@@ -163,9 +164,15 @@ export default [
         defineExpose: 'readonly',
         defineOptions: 'readonly',
       },
+      /* parser：vue-eslint-parser 把 <script> 块交给这个解析器解析。
+         配 @typescript-eslint/parser —— 同时兼容 JS 和 TS 语法：
+           - <script setup>（纯 JS）照常解析
+           - <script lang="ts" setup>（TS 泛型 / 类型注解）也能解析
+         不配的话默认用 espree，遇到 TS 语法（如 <T>）报 Unexpected token */
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
+        parser: tsParser,
       },
     },
   },

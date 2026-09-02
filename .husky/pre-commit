@@ -1,4 +1,3 @@
-#!/usr/bin/env sh
 # pre-commit 钩子：在 git commit 之前执行
 #
 # 流程：
@@ -12,6 +11,5 @@
 #   - 只检查"暂存区文件"，不会扫描整个项目（性能保证）
 #   - --fix 后的修复会自动被 git add 回暂存区
 #   - 想跳过检查临时提交用：git commit --no-verify（仅应急）
-. "$(dirname "$0")/_/husky.sh"
 
 npx lint-staged

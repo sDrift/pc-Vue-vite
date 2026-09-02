@@ -5,6 +5,9 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ztest</title>
+    <!-- Cesium widgets 样式：同源加载（public/cesium/Widgets/widgets.css），
+         避免走第三方 CDN 触发浏览器跟踪防护的 storage 访问警告 -->
+    <link rel="stylesheet" href="/cesium/Widgets/widgets.css" />
   </head>
   <body>
     <div id="app"></div>
