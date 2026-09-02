@@ -1,0 +1,37 @@
+# ============================================================================
+# EditorConfig —— 跨编辑器/IDE 的统一基础格式规范
+# ============================================================================
+# 作用：让所有用本项目的开发者（VS Code / TraeCode / WebStorm / Sublime）
+#       在新建文件时自动用同样的编码、缩进、换行符，避免「git diff
+#       里全是换行符差异」的经典问题。
+#
+# 工作原理：编辑器/IDE 装了 EditorConfig 插件后会自动读这个文件，按
+#           规则设置新建文件的默认格式。已存在的文件不受影响（除非
+#           手动重新格式化）。
+#
+# 优先级：本文件是「最基础」的规范，ESLint / Prettier / Stylelint 的
+#         规则会覆盖 EditorConfig 的相同项（比如 indent_size）。
+#         EditorConfig 只负责「编辑器新建文件时的默认行为」。
+# ============================================================================
+
+# 标记本文件为根配置，编辑器向上查找时碰到此标记就停止
+# （避免父目录的 EditorConfig 干扰本项目）
+root = true
+
+# ---------- 默认规则（适用所有文件）----------
+[*]
+charset = utf-8              # 文件编码：UTF-8（无 BOM）
+end_of_line = lf             # 换行符：LF（Unix 风格，跨平台统一，避免 CRLF 导致 git diff 噪音）
+indent_style = space         # 缩进类型：空格（不用 tab，跟 Prettier 一致）
+indent_size = 2              # 缩进宽度：2 空格（Vue / JS 项目主流）
+trim_trailing_whitespace = true  # 保存时去掉行尾空格（避免无意义 diff）
+insert_final_newline = true  # 文件末尾保留一个空行（POSIX 标准，部分工具要求）
+
+# ---------- Markdown 特殊处理 ----------
+[*.md]
+trim_trailing_whitespace = false  # Markdown 行尾两个空格表示「硬换行」，
+                                   # 去掉会破坏排版，所以 Markdown 不去空格
+
+# ---------- Makefile 特殊处理 ----------
+[Makefile]
+indent_style = tab            # Makefile 必须用 tab 缩进，用空格会语法报错

@@ -9,18 +9,11 @@
     <!-- 页面标题与说明 -->
     <div class="demo-header">
       <h2>Cesium 三维地图演示（重庆主城）</h2>
-      <p>
-        初始化三维地球 → 叠加高德矢量道路图 →
-        相机定位重庆主城。点击点位可显示自定义信息弹窗。
-      </p>
+      <p>初始化三维地球 → 叠加高德矢量道路图 → 相机定位重庆主城。点击点位可显示自定义信息弹窗。</p>
       <!-- 操作按钮：10 个重庆地标点位，点击添加并飞到（addMarker 内部按 name 去重） -->
       <div class="demo-actions">
-        <button class="demo-btn" @click="handleAddMarkers">
-          批量添加点位
-        </button>
-        <button class="demo-btn" @click="handleRemoveMarkers">
-          批量删除点位
-        </button>
+        <button class="demo-btn" @click="handleAddMarkers">批量添加点位</button>
+        <button class="demo-btn" @click="handleRemoveMarkers">批量删除点位</button>
         <button class="demo-btn" @click="handleStartBatchMarkersFrameUpdate">
           开始批量点位帧更新
         </button>
@@ -30,67 +23,41 @@
       </div>
       <!-- 运动模式按钮：调用 startMarkerAnimation，需先「批量添加点位」 -->
       <div class="demo-actions">
-        <button class="demo-btn" @click="handleStartOscillate">
-          往返运动
-        </button>
-        <button class="demo-btn" @click="handleStartCircle">
-          圆周运动
-        </button>
-        <button class="demo-btn" @click="handleStartLoopPath">
-          循环路径
-        </button>
-        <button class="demo-btn" @click="handleStartPathFollow">
-          路径跟随
-        </button>
+        <button class="demo-btn" @click="handleStartOscillate">往返运动</button>
+        <button class="demo-btn" @click="handleStartCircle">圆周运动</button>
+        <button class="demo-btn" @click="handleStartLoopPath">循环路径</button>
+        <button class="demo-btn" @click="handleStartPathFollow">路径跟随</button>
         <span class="demo-tip">需先「批量添加点位」，停止统一用「停止批量点位帧更新」</span>
       </div>
       <!-- 箭头点位沿路径移动：20 个箭头图标点位，沿解放碑→洪崖洞→朝天门循环移动 -->
       <div class="demo-actions">
-        <button class="demo-btn" @click="handleAddArrowMarkers">
-          加载 20 个箭头沿路径移动
-        </button>
-        <button class="demo-btn" @click="handleRemoveArrowMarkers">
-          移除箭头点位
-        </button>
+        <button class="demo-btn" @click="handleAddArrowMarkers">加载 20 个箭头沿路径移动</button>
+        <button class="demo-btn" @click="handleRemoveArrowMarkers">移除箭头点位</button>
         <span class="demo-tip">沿解放碑→洪崖洞→朝天门循环移动，停止用「停止批量点位帧更新」</span>
       </div>
       <!-- 3D 模型演示：调用 cesiumModels.js 工具模块（独立于 CesiumMap 组件） -->
       <div class="demo-actions">
-        <button class="demo-btn" @click="handleLoad3DBuildings">
-          加载建筑白模（ion OSM）
-        </button>
-        <button class="demo-btn" @click="handleRemove3DBuildings">
-          移除建筑白模
-        </button>
-        <button class="demo-btn" @click="handleLoadAircraft">
-          加载飞机模型（ion 资产）
-        </button>
-        <button class="demo-btn" @click="handleRemoveAircraft">
-          移除飞机模型
-        </button>
+        <button class="demo-btn" @click="handleLoad3DBuildings">加载建筑白模（ion OSM）</button>
+        <button class="demo-btn" @click="handleRemove3DBuildings">移除建筑白模</button>
+        <button class="demo-btn" @click="handleLoadAircraft">加载飞机模型（ion 资产）</button>
+        <button class="demo-btn" @click="handleRemoveAircraft">移除飞机模型</button>
         <span class="demo-tip">依赖 ion token（见 .env VITE_CESIUM_ION_TOKEN）</span>
       </div>
       <!-- 自定义 b3dm 演示：加载 public/cesium-assets/my-building/tileset.json 模板 -->
       <div class="demo-actions">
-        <button class="demo-btn" @click="handleLoadCustomB3dm">
-          加载自定义 b3dm（模板）
-        </button>
-        <button class="demo-btn" @click="handleRemoveCustomB3dm">
-          移除自定义 b3dm
-        </button>
-        <span class="demo-tip">把 b3dm 丢到 public/cesium-assets/my-building/，改 tileset.json 的 uri 即可用</span>
+        <button class="demo-btn" @click="handleLoadCustomB3dm">加载自定义 b3dm（模板）</button>
+        <button class="demo-btn" @click="handleRemoveCustomB3dm">移除自定义 b3dm</button>
+        <span class="demo-tip">
+          把 b3dm 丢到 public/cesium-assets/my-building/，改 tileset.json 的 uri 即可用
+        </span>
       </div>
       <div class="demo-actions">
         <div v-for="m in markers" :key="m.name">
           <button class="demo-btn" @click="handleAddMarker(m)">
             {{ m.name }}
           </button>
-          <button class="demo-btn" @click="handleMoveMarker(m)">
-            移动
-          </button>
-          <button class="demo-btn" @click="handleRemoveMarker(m)">
-            删除
-          </button>
+          <button class="demo-btn" @click="handleMoveMarker(m)">移动</button>
+          <button class="demo-btn" @click="handleRemoveMarker(m)">删除</button>
         </div>
       </div>
     </div>
@@ -104,6 +71,7 @@
 
 <script setup>
 import { ref, onUnmounted } from 'vue'
+
 import CesiumMap from '@/components/CesiumMap.vue'
 import {
   load3DTileset,
@@ -123,16 +91,69 @@ const mapRef = ref(null)
    （HTML 字符串，点击点位时显示在 infoBox 弹窗）。
    坐标为 WGS-84；高德瓦片是 GCJ-02，会有数百米偏移（展示可接受）。 */
 const markers = [
-  { name: '解放碑', longitude: 106.5781, latitude: 29.5486, description: '建成：1947 年，抗战胜利纪功碑，重庆城市地标，位于渝中半岛核心。' },
-  { name: '洪崖洞', longitude: 106.5777, latitude: 29.5673, description: '<p><strong>楼层：</strong>11 层吊脚楼</p><p>巴渝民俗风貌区，夜景灯光观赏胜地。</p>' },
-  { name: '人民大礼堂', longitude: 106.5512, latitude: 29.5544, description: '<p><strong>建成：</strong>1955 年</p><p>仿古建筑群，重庆标志性建筑，曾是西南最大礼堂。</p>' },
-  { name: '重庆北站', longitude: 106.5516, latitude: 29.6074, description: '<p><strong>投用：</strong>2006 年</p><p>铁路枢纽站，西南地区重要客运站。</p>' },
-  { name: '江北机场', longitude: 106.6407, latitude: 29.7200, description: '<p><strong>通航：</strong>1990 年</p><p>4E 级干线机场，西南主要航空枢纽。</p>' },
-  { name: '磁器口', longitude: 106.4470, latitude: 29.5790, description: '<p><strong>历史：</strong>千年古镇</p><p>明清风格商贸古镇，嘉陵江畔。</p>' },
-  { name: '长江索道', longitude: 106.5850, latitude: 29.5600, description: '<p><strong>运营：</strong>1987 年</p><p>万里长江第一条跨江客运索道。</p>' },
-  { name: '南山一棵树', longitude: 106.5960, latitude: 29.5220, description: '<p><strong>海拔：</strong>约 444 米</p><p>重庆夜景观赏最佳点之一。</p>' },
-  { name: '朝天门', longitude: 106.5870, latitude: 29.5680, description: '<p><strong>位置：</strong>两江交汇</p><p>长江与嘉陵江交汇处，重庆最古老码头。</p>' },
-  { name: '重庆大剧院', longitude: 106.5810, latitude: 29.5710, description: '<p><strong>建成：</strong>2005 年</p><p>江北嘴地标，弧形玻璃幕墙建筑。</p>' },
+  {
+    name: '解放碑',
+    longitude: 106.5781,
+    latitude: 29.5486,
+    description: '建成：1947 年，抗战胜利纪功碑，重庆城市地标，位于渝中半岛核心。',
+  },
+  {
+    name: '洪崖洞',
+    longitude: 106.5777,
+    latitude: 29.5673,
+    description:
+      '<p><strong>楼层：</strong>11 层吊脚楼</p><p>巴渝民俗风貌区，夜景灯光观赏胜地。</p>',
+  },
+  {
+    name: '人民大礼堂',
+    longitude: 106.5512,
+    latitude: 29.5544,
+    description:
+      '<p><strong>建成：</strong>1955 年</p><p>仿古建筑群，重庆标志性建筑，曾是西南最大礼堂。</p>',
+  },
+  {
+    name: '重庆北站',
+    longitude: 106.5516,
+    latitude: 29.6074,
+    description: '<p><strong>投用：</strong>2006 年</p><p>铁路枢纽站，西南地区重要客运站。</p>',
+  },
+  {
+    name: '江北机场',
+    longitude: 106.6407,
+    latitude: 29.72,
+    description: '<p><strong>通航：</strong>1990 年</p><p>4E 级干线机场，西南主要航空枢纽。</p>',
+  },
+  {
+    name: '磁器口',
+    longitude: 106.447,
+    latitude: 29.579,
+    description: '<p><strong>历史：</strong>千年古镇</p><p>明清风格商贸古镇，嘉陵江畔。</p>',
+  },
+  {
+    name: '长江索道',
+    longitude: 106.585,
+    latitude: 29.56,
+    description: '<p><strong>运营：</strong>1987 年</p><p>万里长江第一条跨江客运索道。</p>',
+  },
+  {
+    name: '南山一棵树',
+    longitude: 106.596,
+    latitude: 29.522,
+    description: '<p><strong>海拔：</strong>约 444 米</p><p>重庆夜景观赏最佳点之一。</p>',
+  },
+  {
+    name: '朝天门',
+    longitude: 106.587,
+    latitude: 29.568,
+    description:
+      '<p><strong>位置：</strong>两江交汇</p><p>长江与嘉陵江交汇处，重庆最古老码头。</p>',
+  },
+  {
+    name: '重庆大剧院',
+    longitude: 106.581,
+    latitude: 29.571,
+    description: '<p><strong>建成：</strong>2005 年</p><p>江北嘴地标，弧形玻璃幕墙建筑。</p>',
+  },
 ]
 const newMarkers = ref([]) // 批量添加的点位数据，便于后续删除
 
@@ -144,7 +165,8 @@ const handleAddMarker = (m) => {
 }
 const handleMoveMarker = (m) => {
   if (!mapRef.value) return
-  mapRef.value.moveEntityMarker(m.name,
+  mapRef.value.moveEntityMarker(
+    m.name,
     m.longitude + Math.random() * 0.01 - 0.005,
     m.latitude + Math.random() * 0.01 - 0.005,
     100 + Math.random() * 50,
@@ -159,7 +181,8 @@ const handleRemoveMarker = (m) => {
 const handleAddMarkers = () => {
   if (!mapRef.value) return
   handleRemoveMarkers() // 先删除已有批量点位，避免重复添加
-  let arr = []
+  const arr = []
+
   for (let i = 0; i < 5000; i++) {
     arr.push({
       name: `重庆地标-${i + 1}`,
@@ -170,6 +193,14 @@ const handleAddMarkers = () => {
   }
   newMarkers.value = arr
   mapRef.value.addMarkers(arr)
+  let a = 1
+
+  if (a === 1) {
+    a = 2
+  } else {
+    a = 1
+  }
+  console.log(a)
 }
 const handleRemoveMarkers = () => {
   if (!mapRef.value) return
@@ -180,24 +211,19 @@ const handleRemoveMarkers = () => {
 const handleStartBatchMarkersFrameUpdate = () => {
   if (!mapRef.value) return
 
-  mapRef.value.startBatchMarkersFrameUpdate(
-    (marker, time, index, seconds) => {
-      // 使用 Cesium 时间，避免移动速度受帧率影响
+  mapRef.value.startBatchMarkersFrameUpdate((marker, time, index, seconds) => {
+    // 使用 Cesium 时间，避免移动速度受帧率影响
 
-      return {
-        // 以原始位置为中心往返移动
-        longitude:
-          marker.originalLongitude +
-          Math.sin(seconds + index) * 1,
-        // Math.random() * 0.005 - 0.002, // ±0.005 度
+    return {
+      // 以原始位置为中心往返移动
+      longitude: marker.originalLongitude + Math.sin(seconds + index) * 1,
+      // Math.random() * 0.005 - 0.002, // ±0.005 度
 
+      latitude: marker.originalLatitude,
 
-        latitude: marker.originalLatitude,
-
-        height: marker.height,
-      }
-    },
-  )
+      height: marker.height,
+    }
+  })
 }
 const handleStopBatchMarkersFrameUpdate = () => {
   if (!mapRef.value) return
@@ -216,8 +242,8 @@ const handleStartOscillate = () => {
   mapRef.value.startMarkerAnimation({
     mode: 'oscillate',
     amplitude: 0.01, // 振幅 0.01 度 ≈ 1.1km
-    period: 4,        // 周期 4 秒
-    axis: 'x',        // 仅经度方向往返
+    period: 4, // 周期 4 秒
+    axis: 'x', // 仅经度方向往返
   })
 }
 
@@ -244,7 +270,7 @@ const handleStartLoopPath = () => {
     path: [
       { longitude: 106.5781, latitude: 29.5486 }, // 解放碑
       { longitude: 106.5777, latitude: 29.5673 }, // 洪崖洞
-      { longitude: 106.5870, latitude: 29.5680 }, // 朝天门
+      { longitude: 106.587, latitude: 29.568 }, // 朝天门
       { longitude: 106.5512, latitude: 29.5544 }, // 人民大礼堂
     ],
   })
@@ -260,7 +286,7 @@ const handleStartPathFollow = () => {
     path: [
       { longitude: 106.5781, latitude: 29.5486 }, // 解放碑
       { longitude: 106.5777, latitude: 29.5673 }, // 洪崖洞
-      { longitude: 106.5870, latitude: 29.5680 }, // 朝天门
+      { longitude: 106.587, latitude: 29.568 }, // 朝天门
     ],
   })
 }
@@ -279,23 +305,25 @@ const handleLoad3DBuildings = async () => {
   if (!mapRef.value?.viewer) return
   const tileset = await load3DTileset(mapRef.value.viewer, {
     tag: BUILDINGS_TAG,
-    assetId: 96188,             // Cesium OSM Buildings
-    heightOffset: 0,           // 重庆地形与建筑基准基本对齐，保持 0
+    assetId: 96188, // Cesium OSM Buildings
+    heightOffset: 0, // 重庆地形与建筑基准基本对齐，保持 0
     maximumScreenSpaceError: 16,
     /* GCJ-02 偏移：底图是高德（GCJ-02），OSM Buildings 是 WGS-84，
      * 用解放碑做参考点整体平移，让参考点附近（重庆主城）的建筑跟
      * 高德道路底图对齐。远离主城的区域有少量二次偏差。 */
     applyGcj02: true,
-    referenceLongitude: 106.5781,   // 解放碑
+    referenceLongitude: 106.5781, // 解放碑
     referenceLatitude: 29.5486,
   })
-  if (tileset) flyToObject(mapRef.value.viewer, tileset, {
-    height: 2000,
-    heading: 0,                    // 朝正北
-    pitch: -60,                    // 陡俯视，60 度看建筑群更立体
-    fallbackLongitude: 106.5781,   // 重庆解放碑
-    fallbackLatitude: 29.5486,
-  })
+
+  if (tileset)
+    flyToObject(mapRef.value.viewer, tileset, {
+      height: 2000,
+      heading: 0, // 朝正北
+      pitch: -60, // 陡俯视，60 度看建筑群更立体
+      fallbackLongitude: 106.5781, // 重庆解放碑
+      fallbackLatitude: 29.5486,
+    })
 }
 
 const handleRemove3DBuildings = () => {
@@ -312,17 +340,19 @@ const handleLoadAircraft = async () => {
   const model = await loadModel(mapRef.value.viewer, {
     tag: AIRCRAFT_TAG,
     url: '/cesium/Assets/Cesium_Air.glb',
-    longitude: 106.5781,        // 解放碑
+    longitude: 106.5781, // 解放碑
     latitude: 29.5486,
-    height: 500,                // 上空 500 米
-    scale: 5,                   // 调小：原 50 太大，5 大约真实飞机尺寸（25m 翼展）
-    heading: 90,                // 朝东
+    height: 500, // 上空 500 米
+    scale: 5, // 调小：原 50 太大，5 大约真实飞机尺寸（25m 翼展）
+    heading: 90, // 朝东
   })
-  if (model) flyToObject(mapRef.value.viewer, model, {
-    height: 3500,
-    heading: 90,                   // 朝东（跟飞机朝向一致）
-    pitch: -45,                    // 斜俯视，能同时看到飞机和地面
-  })
+
+  if (model)
+    flyToObject(mapRef.value.viewer, model, {
+      height: 3500,
+      heading: 90, // 朝东（跟飞机朝向一致）
+      pitch: -45, // 斜俯视，能同时看到飞机和地面
+    })
 }
 
 const handleRemoveAircraft = () => {
@@ -350,6 +380,7 @@ const handleLoadCustomB3dm = async () => {
     heightOffset: 0, // 模型整体抬高/降低（米），按需调整
     maximumScreenSpaceError: 16,
   })
+
   if (tileset) {
     flyToObject(mapRef.value.viewer, tileset, {
       height: 500,
@@ -373,19 +404,17 @@ const handleRemoveCustomB3dm = () => {
  */
 
 /* 箭头图标：红色三角形 + 白色描边，向上指 */
-const arrowImage =
-  'data:image/svg+xml,' +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">' +
+const arrowImage = `data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">' +
     '<path d="M16 2 L30 28 L16 22 L2 28 Z" fill="#ff4444" stroke="#ffffff" stroke-width="1.5"/>' +
     '</svg>',
-  )
+)}`
 
 /* 路径：从 10 个地标里选 3 个作为循环移动路径 */
 const ARROW_MOVING_PATH = [
   { longitude: 106.5781, latitude: 29.5486 }, // 解放碑
   { longitude: 106.5777, latitude: 29.5673 }, // 洪崖洞
-  { longitude: 106.5870, latitude: 29.5680 }, // 朝天门
+  { longitude: 106.587, latitude: 29.568 }, // 朝天门
 ]
 
 const arrowMarkers = ref([]) // 保存 20 个箭头点位，便于后续删除
@@ -403,6 +432,7 @@ const handleAddArrowMarkers = () => {
 
   const start = ARROW_MOVING_PATH[0]
   const arr = []
+
   for (let i = 0; i < 20; i++) {
     // 初始位置：在路径起点（解放碑）附近小范围错开，避免 20 个点位完全重叠
     arr.push({
@@ -411,8 +441,8 @@ const handleAddArrowMarkers = () => {
       latitude: start.latitude + (Math.random() - 0.5) * 0.001,
       height: 50,
       image: arrowImage,
-      width: 24,
-      height: 24, // 略小于默认 32，避免 20 个箭头互相遮挡
+      imageWidth: 24,
+      imageHeight: 24, // 略小于默认 32，避免 20 个箭头互相遮挡
       description: `<p>箭头点位 #${i + 1}，沿解放碑→洪崖洞→朝天门循环移动</p>`,
     })
   }
@@ -458,32 +488,32 @@ onUnmounted(() => {
 
 .demo-header h2 {
   margin: 0 0 6px;
-  font-size: 18px;
   color: #303133;
+  font-size: 18px;
 }
 
 .demo-header p {
   margin: 0;
-  font-size: 13px;
   color: #909399;
+  font-size: 13px;
   line-height: 1.6;
 }
 
 /* 操作按钮区：横向排列、自动换行 */
 .demo-actions {
-  margin-top: 10px;
   display: flex;
   flex-wrap: wrap;
+  margin-top: 10px;
   gap: 8px;
 }
 
 .demo-btn {
   padding: 6px 14px;
-  font-size: 13px;
-  color: #fff;
-  background: #409eff;
   border: none;
   border-radius: 4px;
+  background: #409eff;
+  color: #fff;
+  font-size: 13px;
   cursor: pointer;
 }
 
@@ -492,17 +522,17 @@ onUnmounted(() => {
 }
 
 .demo-tip {
-  align-self: center;
-  font-size: 12px;
   color: #909399;
+  font-size: 12px;
+  align-self: center;
 }
 
 /* 地图容器占满剩余高度，确保 Cesium canvas 有明确尺寸 */
 .demo-map-wrapper {
-  flex: 1;
+  overflow: hidden;
   min-height: 500px;
   border: 1px solid #ebeef5;
   border-radius: 6px;
-  overflow: hidden;
+  flex: 1;
 }
 </style>

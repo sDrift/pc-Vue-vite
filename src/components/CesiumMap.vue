@@ -36,9 +36,7 @@
     <!-- 自定义点位弹窗，不再使用 Cesium 默认 InfoBox -->
     <div v-if="popupVisible" class="custom-popup" :style="popupStyle">
       <!-- 关闭弹窗按钮 -->
-      <button class="popup-close" @click="closePopup">
-        ×
-      </button>
+      <button class="popup-close" @click="closePopup">×</button>
 
       <!-- 点位名称 -->
       <div class="popup-title">
@@ -52,9 +50,9 @@
 </template>
 
 <script setup>
+import * as Cesium from 'cesium'
 import { ref, computed, onMounted, onBeforeUnmount, shallowRef } from 'vue'
 // 引入 Cesium 主包（ESM 形式）。Vite 会把它打进 bundle 或按需拆包。
-import * as Cesium from 'cesium'
 // 引入 Cesium 默认 UI 控件样式（动画控件、时间轴、全屏按钮等）
 import 'cesium/Build/Cesium/Widgets/widgets.css'
 
@@ -156,10 +154,12 @@ let batchFrameUpdateHandler = null
 function getCanvasScale() {
   if (!viewer.value) return { sx: 1, sy: 1 }
   const canvas = viewer.value.scene.canvas
+
   if (!canvas) return { sx: 1, sy: 1 }
   const rect = canvas.getBoundingClientRect()
   const cssWidth = canvas.clientWidth || 1
   const cssHeight = canvas.clientHeight || 1
+
   return {
     sx: rect.width / cssWidth,
     sy: rect.height / cssHeight,
@@ -170,6 +170,7 @@ function getCanvasScale() {
 function toViewportPosition(screenPos) {
   if (!screenPos) return screenPos
   const { sx, sy } = getCanvasScale()
+
   return new Cesium.Cartesian2(screenPos.x / sx, screenPos.y / sy)
 }
 
@@ -283,9 +284,9 @@ onMounted(async () => {
     new Cesium.UrlTemplateImageryProvider({
       url: 'https://webst0{s}.is.autonavi.com/appmaptile?style=7&x={x}&y={y}&z={z}',
       subdomains: ['1', '2', '3', '4'], // 轮询 webst01~04 四个子域
-      minimumLevel: 3,                  // 最小层级，避免低层瓦片越界
-      maximumLevel: 18,                 // 高德瓦片最高约 18 级
-    })
+      minimumLevel: 3, // 最小层级，避免低层瓦片越界
+      maximumLevel: 18, // 高德瓦片最高约 18 级
+    }),
   )
 
   /* —— 备选：天地图（TIANDITU）官方底图，WGS-84 无偏移，需申请 tk ——
@@ -323,32 +324,29 @@ onMounted(async () => {
   viewer.value.camera.flyTo({
     destination: Cesium.Cartesian3.fromDegrees(106.55, 29.56, 30000),
     orientation: {
-      heading: Cesium.Math.toRadians(0.0),    // 朝向正北
-      pitch: Cesium.Math.toRadians(-70.0),    // 陡俯视，主城居中
+      heading: Cesium.Math.toRadians(0.0), // 朝向正北
+      pitch: Cesium.Math.toRadians(-70.0), // 陡俯视，主城居中
     },
   })
 
-  screenSpaceHandler = new Cesium.ScreenSpaceEventHandler(
-    viewer.value.scene.canvas,
-  )
+  screenSpaceHandler = new Cesium.ScreenSpaceEventHandler(viewer.value.scene.canvas)
   /*
-  * 注册鼠标移动事件。
-  * 鼠标移动时，Cesium 会检测鼠标下方是否有点位：
-  * - 有点位：放大图标；
-  * - 移出点位：恢复原大小。
-  */
+   * 注册鼠标移动事件。
+   * 鼠标移动时，Cesium 会检测鼠标下方是否有点位：
+   * - 有点位：放大图标；
+   * - 移出点位：恢复原大小。
+   */
   screenSpaceHandler.setInputAction((event) => {
     /* 坐标修正：祖先存在 transform: scale 时必须先从视觉坐标转视口坐标 */
     updateHoverMarker(toViewportPosition(event.endPosition))
   }, Cesium.ScreenSpaceEventType.MOUSE_MOVE)
   screenSpaceHandler.setInputAction((event) => {
     /* 坐标修正：祖先存在 transform: scale 时必须先从视觉坐标转视口坐标 */
-    const picked = viewer.value.scene.pick(
-      toViewportPosition(event.position),
-    )
+    const picked = viewer.value.scene.pick(toViewportPosition(event.position))
 
     if (!Cesium.defined(picked)) {
       closePopup()
+
       return
     }
 
@@ -359,10 +357,7 @@ onMounted(async () => {
      */
     const marker = picked.id
 
-    if (
-      marker instanceof Cesium.Entity ||
-      marker?.isBatchMarker === true
-    ) {
+    if (marker instanceof Cesium.Entity || marker?.isBatchMarker === true) {
       selectedMarker.value = marker
       popupTitle.value = marker.name || ''
 
@@ -371,27 +366,21 @@ onMounted(async () => {
        * 批量点位的 description 是普通字符串。
        */
       popupDescription.value =
-        marker instanceof Cesium.Entity &&
-          typeof marker.description?.getValue === 'function'
-          ? marker.description.getValue(
-            viewer.value.clock.currentTime,
-          )
+        marker instanceof Cesium.Entity && typeof marker.description?.getValue === 'function'
+          ? marker.description.getValue(viewer.value.clock.currentTime)
           : marker.description || ''
 
       popupVisible.value = true
       updatePopupPosition()
+
       return
     }
 
     closePopup()
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK)
 
-
-
   /* 相机移动、缩放时持续更新弹窗位置 */
-  viewer.value.scene.postRender.addEventListener(
-    updatePopupPosition,
-  )
+  viewer.value.scene.postRender.addEventListener(updatePopupPosition)
 
   /* 调试：临时挂到 window，方便浏览器控制台验证 infoBox 交互。
      验证完成后删除此行。 */
@@ -447,11 +436,7 @@ onMounted(async () => {
 // }
 
 function updatePopupPosition() {
-  if (
-    !viewer.value ||
-    !selectedMarker.value ||
-    !popupVisible.value
-  ) {
+  if (!viewer.value || !selectedMarker.value || !popupVisible.value) {
     return
   }
 
@@ -461,9 +446,7 @@ function updatePopupPosition() {
    */
   const position =
     selectedMarker.value instanceof Cesium.Entity
-      ? selectedMarker.value.position?.getValue(
-        viewer.value.clock.currentTime,
-      )
+      ? selectedMarker.value.position?.getValue(viewer.value.clock.currentTime)
       : selectedMarker.value.position
 
   if (!position) return
@@ -472,14 +455,14 @@ function updatePopupPosition() {
    * 将三维坐标转换成浏览器屏幕坐标，
    * 用于定位 Vue 自定义弹窗。
    */
-  const windowPosition =
-    Cesium.SceneTransforms.worldToWindowCoordinates(
-      viewer.value.scene,
-      position,
-    )
+  const windowPosition = Cesium.SceneTransforms.worldToWindowCoordinates(
+    viewer.value.scene,
+    position,
+  )
 
   if (!windowPosition) {
     popupVisible.value = false
+
     return
   }
 
@@ -495,22 +478,12 @@ function updatePopupPosition() {
 function restoreHoverMarker() {
   if (!hoveredMarker) return
 
-  if (
-    hoveredMarker.type === 'batch' &&
-    hoveredMarker.marker.primitive
-  ) {
-    hoveredMarker.marker.primitive.scale =
-      hoveredMarker.originalScale
+  if (hoveredMarker.type === 'batch' && hoveredMarker.marker.primitive) {
+    hoveredMarker.marker.primitive.scale = hoveredMarker.originalScale
   }
 
-  if (
-    hoveredMarker.type === 'entity' &&
-    hoveredMarker.entity.billboard
-  ) {
-    hoveredMarker.entity.billboard.scale =
-      new Cesium.ConstantProperty(
-        hoveredMarker.originalScale,
-      )
+  if (hoveredMarker.type === 'entity' && hoveredMarker.entity.billboard) {
+    hoveredMarker.entity.billboard.scale = new Cesium.ConstantProperty(hoveredMarker.originalScale)
   }
 
   hoveredMarker = null
@@ -523,12 +496,12 @@ function restoreHoverMarker() {
  * 设置鼠标悬停点位。
  */
 function updateHoverMarker(position) {
-
   if (!viewer.value || !position) return
   const picked = viewer.value.scene.pick(position)
 
   if (!Cesium.defined(picked)) {
     restoreHoverMarker()
+
     return
   }
 
@@ -542,12 +515,11 @@ function updateHoverMarker(position) {
 
     if (!primitive) {
       restoreHoverMarker()
+
       return
     }
 
-    if (
-      hoveredMarker?.marker === pickedId
-    ) {
+    if (hoveredMarker?.marker === pickedId) {
       return
     }
 
@@ -560,30 +532,24 @@ function updateHoverMarker(position) {
     }
 
     // 鼠标移上去后放大图片
-    primitive.scale =
-      hoveredMarker.originalScale * 1.3
+    primitive.scale = hoveredMarker.originalScale * 1.3
 
     viewer.value.scene.requestRender()
+
     return
   }
 
   /*
    * 处理原来的 Entity 点位。
    */
-  if (
-    pickedId instanceof Cesium.Entity &&
-    pickedId.billboard
-  ) {
+  if (pickedId instanceof Cesium.Entity && pickedId.billboard) {
     if (hoveredMarker?.entity === pickedId) {
       return
     }
 
     restoreHoverMarker()
 
-    const originalScale =
-      pickedId.billboard.scale?.getValue(
-        viewer.value.clock.currentTime,
-      ) || 1
+    const originalScale = pickedId.billboard.scale?.getValue(viewer.value.clock.currentTime) || 1
 
     hoveredMarker = {
       type: 'entity',
@@ -591,12 +557,10 @@ function updateHoverMarker(position) {
       originalScale,
     }
 
-    pickedId.billboard.scale =
-      new Cesium.ConstantProperty(
-        originalScale * 1.3,
-      )
+    pickedId.billboard.scale = new Cesium.ConstantProperty(originalScale * 1.3)
 
     viewer.value.scene.requestRender()
+
     return
   }
 
@@ -650,19 +614,19 @@ function flyToMarker(marker) {
       viewer: viewer.value,
       marker,
     })
+
     return
   }
 
   // 读取点位当前时刻的三维坐标
   const position =
     marker instanceof Cesium.Entity
-      ? marker.position?.getValue(
-        viewer.value.clock.currentTime,
-      )
+      ? marker.position?.getValue(viewer.value.clock.currentTime)
       : marker.position
 
   if (!position) {
     console.warn('无法获取点位坐标', marker)
+
     return
   }
 
@@ -675,10 +639,7 @@ function flyToMarker(marker) {
    * 创建一个以点位为中心的包围球。
    * 半径不能为 0，否则某些情况下相机无法正确计算距离。
    */
-  const boundingSphere = new Cesium.BoundingSphere(
-    position,
-    1,
-  )
+  const boundingSphere = new Cesium.BoundingSphere(position, 1)
 
   /*
    * 相机与点位保持 28 公里距离：
@@ -686,17 +647,14 @@ function flyToMarker(marker) {
    * pitch：向下俯视 70 度
    * range：距离点位 28000 米
    */
-  viewer.value.camera.flyToBoundingSphere(
-    boundingSphere,
-    {
-      duration: 1.5,
-      offset: new Cesium.HeadingPitchRange(
-        Cesium.Math.toRadians(0),
-        Cesium.Math.toRadians(-70),
-        28000,
-      ),
-    },
-  )
+  viewer.value.camera.flyToBoundingSphere(boundingSphere, {
+    duration: 1.5,
+    offset: new Cesium.HeadingPitchRange(
+      Cesium.Math.toRadians(0),
+      Cesium.Math.toRadians(-70),
+      28000,
+    ),
+  })
 }
 /* ----------------------------------------------------------------
  * 添加点位标注（外部按需调用，如点击按钮时触发）
@@ -725,22 +683,22 @@ function addMarker({ longitude, latitude, name, description = '', height = 0, fl
   latitude = Number(latitude)
   height = Number(height) || 0
 
-  if (
-    !Number.isFinite(longitude) ||
-    !Number.isFinite(latitude)
-  ) {
+  if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
     console.warn('Entity 点位坐标无效')
+
     return null
   }
   /* 去重：同名 entity 已存在则飞到它，不重复添加。
 
      entities.values 是所有实体的数组，按 name 匹配。 */
-  const existing = viewer.value.entities.values.find(e => e.name === name)
+  const existing = viewer.value.entities.values.find((e) => e.name === name)
+
   // debugger
   if (existing) {
     if (flyTo) {
       flyToMarker(existing)
     }
+
     return existing
   }
 
@@ -766,8 +724,7 @@ function addMarker({ longitude, latitude, name, description = '', height = 0, fl
       width: 36,
       height: 36,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-      disableDepthTestDistance:
-        Number.POSITIVE_INFINITY,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
     },
     label: {
       text: name,
@@ -807,11 +764,13 @@ function addMarker({ longitude, latitude, name, description = '', height = 0, fl
 function addMarkers(markerList = []) {
   if (!viewer.value) {
     console.warn('Viewer 尚未初始化')
+
     return []
   }
 
   if (!Array.isArray(markerList)) {
     console.error('批量点位必须是数组')
+
     return []
   }
 
@@ -820,20 +779,16 @@ function addMarkers(markerList = []) {
    * 避免创建大量 Entity 对象。
    */
   if (!markerCollection) {
-    markerCollection =
-      viewer.value.scene.primitives.add(
-        // new Cesium.PointPrimitiveCollection(),
-        new Cesium.BillboardCollection(),
-      )
+    markerCollection = viewer.value.scene.primitives.add(
+      // new Cesium.PointPrimitiveCollection(),
+      new Cesium.BillboardCollection(),
+    )
   }
 
   const markers = []
 
   markerList.forEach((item, index) => {
-
-    const exists = [...batchMarkers].some(
-      (marker) => marker.name === item.name,
-    )
+    const exists = [...batchMarkers].some((marker) => marker.name === item.name)
 
     if (exists) {
       return
@@ -845,22 +800,16 @@ function addMarkers(markerList = []) {
     /*
      * 跳过坐标不合法的数据。
      */
-    if (
-      !Number.isFinite(longitude) ||
-      !Number.isFinite(latitude)
-    ) {
+    if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
       console.warn(`第 ${index + 1} 个点位坐标无效`, item)
+
       return
     }
 
     /*
      * 将经纬度转换为 Cesium 的三维坐标。
      */
-    const position = Cesium.Cartesian3.fromDegrees(
-      longitude,
-      latitude,
-      height,
-    )
+    const position = Cesium.Cartesian3.fromDegrees(longitude, latitude, height)
 
     /*
      * 这是点击点位后返回的业务数据。
@@ -887,8 +836,8 @@ function addMarkers(markerList = []) {
      * 删除点位时需要通过这个实例从集合中移除。
      */
     /*
- * 添加图片点位。
- */
+     * 添加图片点位。
+     */
     const primitive = markerCollection.add({
       // 点位三维坐标
       position,
@@ -896,17 +845,16 @@ function addMarkers(markerList = []) {
       // 图片地址：支持每个点位自定义图标，未传则用默认 markerImage
       image: item.image || markerImage,
 
-      // 图片显示大小
-      width: Number(item.width) || 32,
-      height: Number(item.height) || 32,
+      // 图片显示大小（用 imageWidth/imageHeight 避免和海拔 height 冲突）
+      width: Number(item.imageWidth) || 32,
+      height: Number(item.imageHeight) || 32,
 
       // 图片底部中心对准经纬度
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
 
       // 关闭深度遮挡，保证图片始终可见
-      disableDepthTestDistance:
-        Number.POSITIVE_INFINITY,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
 
       // 点击时通过 picked.id 获取业务数据
       id: markerData,
@@ -951,11 +899,9 @@ function moveEntityMarker(markerKey, longitude, latitude, height = 0) {
   const lat = Number(latitude)
   const h = Number(height) || 0
 
-  if (
-    !Number.isFinite(lon) ||
-    !Number.isFinite(lat)
-  ) {
+  if (!Number.isFinite(lon) || !Number.isFinite(lat)) {
     console.warn('Entity 移动坐标无效')
+
     return false
   }
 
@@ -963,30 +909,25 @@ function moveEntityMarker(markerKey, longitude, latitude, height = 0) {
     markerKey instanceof Cesium.Entity
       ? markerKey
       : viewer.value.entities.values.find(
-        (item) =>
-          item.name === markerKey ||
-          item.id === markerKey,
-      )
+          (item) => item.name === markerKey || item.id === markerKey,
+        )
 
   if (!entity) {
     console.warn('没有找到 Entity 点位：', markerKey)
+
     return false
   }
 
-  const position = Cesium.Cartesian3.fromDegrees(
-    lon,
-    lat,
-    h,
-  )
+  const position = Cesium.Cartesian3.fromDegrees(lon, lat, h)
 
   /*
    * Entity 的位置是 Property，
    * 使用 ConstantPositionProperty 设置固定位置。
    */
-  entity.position =
-    new Cesium.ConstantPositionProperty(position)
+  entity.position = new Cesium.ConstantPositionProperty(position)
 
   viewer.value.scene.requestRender()
+
   return true
 }
 
@@ -1018,11 +959,13 @@ function moveEntityMarker(markerKey, longitude, latitude, height = 0) {
 function startBatchMarkersFrameUpdate(updateCallback) {
   if (!viewer.value) {
     console.warn('Viewer 尚未初始化')
+
     return
   }
 
   if (typeof updateCallback !== 'function') {
     console.error('updateCallback 必须是函数')
+
     return
   }
 
@@ -1042,17 +985,11 @@ function startBatchMarkersFrameUpdate(updateCallback) {
     const currentTime = viewer.value.clock.currentTime
 
     // 当前帧只计算一次时间
-    const seconds =
-      (performance.now() - startTime) / 1000
+    const seconds = (performance.now() - startTime) / 1000
     let index = 0
 
     batchMarkers.forEach((marker) => {
-      const nextPosition = updateCallback(
-        marker,
-        currentTime,
-        index,
-        seconds
-      )
+      const nextPosition = updateCallback(marker, currentTime, index, seconds)
 
       index += 1
 
@@ -1065,10 +1002,7 @@ function startBatchMarkersFrameUpdate(updateCallback) {
       const latitude = Number(nextPosition.latitude)
       const height = Number(nextPosition.height) || 0
 
-      if (
-        !Number.isFinite(longitude) ||
-        !Number.isFinite(latitude)
-      ) {
+      if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
         return
       }
 
@@ -1127,22 +1061,15 @@ function startBatchMarkersFrameUpdate(updateCallback) {
     viewer.value.scene.requestRender()
   }
 
-  viewer.value.scene.preUpdate.addEventListener(
-    batchFrameUpdateHandler,
-  )
+  viewer.value.scene.preUpdate.addEventListener(batchFrameUpdateHandler)
 }
 
 /*
  * 停止批量点位的每帧更新。
  */
 function stopBatchMarkersFrameUpdate() {
-  if (
-    viewer.value &&
-    batchFrameUpdateHandler
-  ) {
-    viewer.value.scene.preUpdate.removeEventListener(
-      batchFrameUpdateHandler,
-    )
+  if (viewer.value && batchFrameUpdateHandler) {
+    viewer.value.scene.preUpdate.removeEventListener(batchFrameUpdateHandler)
 
     batchFrameUpdateHandler = null
 
@@ -1177,12 +1104,7 @@ function stopBatchMarkersFrameUpdate() {
  */
 
 /* 往返运动：在原始位置附近沿坐标轴做正弦往返 */
-function createOscillateMove({
-  amplitude = 0.01,
-  period = 5,
-  axis = 'x',
-  phase = 0,
-} = {}) {
+function createOscillateMove({ amplitude = 0.01, period = 5, axis = 'x', phase = 0 } = {}) {
   const safePeriod = Math.max(period, 0.001)
   const omega = (2 * Math.PI) / safePeriod
   const useX = axis === 'x' || axis === 'xy'
@@ -1190,28 +1112,26 @@ function createOscillateMove({
 
   return (marker, _time, index, seconds) => {
     const offset = Math.sin(omega * seconds + index * 0.3 + phase) * amplitude
+
     return {
       longitude: useX
         ? Number(marker.originalLongitude) + offset
         : Number(marker.originalLongitude),
-      latitude: useY
-        ? Number(marker.originalLatitude) + offset
-        : Number(marker.originalLatitude),
+      latitude: useY ? Number(marker.originalLatitude) + offset : Number(marker.originalLatitude),
       height: Number(marker.originalHeight) || 0,
     }
   }
 }
 
 /* 圆周运动：围绕指定中心点做匀速圆周运动 */
-function createCircleMove({
-  center,
-  radius = 0.01,
-  duration = 10,
-  direction = 1,
-  phase = 0,
-} = {}) {
-  if (!center || !Number.isFinite(Number(center.longitude)) || !Number.isFinite(Number(center.latitude))) {
+function createCircleMove({ center, radius = 0.01, duration = 10, direction = 1, phase = 0 } = {}) {
+  if (
+    !center ||
+    !Number.isFinite(Number(center.longitude)) ||
+    !Number.isFinite(Number(center.latitude))
+  ) {
     console.warn('circle 模式必须提供 center: { longitude, latitude }')
+
     return null
   }
   const safeDuration = Math.max(duration, 0.001)
@@ -1230,6 +1150,7 @@ function createCircleMove({
 function createLoopPathMove({ path = [], duration = 10, phase = 0 } = {}) {
   if (!Array.isArray(path) || path.length < 2) {
     console.warn('loopPath 模式至少需要 2 个路径点 path: [{longitude, latitude}, ...]')
+
     return null
   }
   const safeDuration = Math.max(duration, 0.001)
@@ -1237,7 +1158,7 @@ function createLoopPathMove({ path = [], duration = 10, phase = 0 } = {}) {
 
   return (marker, _time, index, seconds) => {
     /* t 在 [0,1) 内循环；不同点位用 phase+index 错开起始位置 */
-    const t = ((seconds / safeDuration) + phase + index * 0.05) % 1
+    const t = (seconds / safeDuration + phase + index * 0.05) % 1
     const segFloat = t * segCount
     const segIndex = Math.floor(segFloat) % segCount
     const segT = segFloat - Math.floor(segFloat)
@@ -1247,6 +1168,7 @@ function createLoopPathMove({ path = [], duration = 10, phase = 0 } = {}) {
     const dLng = Number(p2.longitude) - Number(p1.longitude)
     const dLat = Number(p2.latitude) - Number(p1.latitude)
     const heading = Math.atan2(dLng, dLat)
+
     return {
       longitude: Number(p1.longitude) + (Number(p2.longitude) - Number(p1.longitude)) * segT,
       latitude: Number(p1.latitude) + (Number(p2.latitude) - Number(p1.latitude)) * segT,
@@ -1260,6 +1182,7 @@ function createLoopPathMove({ path = [], duration = 10, phase = 0 } = {}) {
 function createPathFollowMove({ path = [], duration = 10, phase = 0 } = {}) {
   if (!Array.isArray(path) || path.length < 2) {
     console.warn('pathFollow 模式至少需要 2 个路径点 path: [{longitude, latitude}, ...]')
+
     return null
   }
   const safeDuration = Math.max(duration, 0.001)
@@ -1268,6 +1191,7 @@ function createPathFollowMove({ path = [], duration = 10, phase = 0 } = {}) {
   return (marker, _time, index, seconds) => {
     /* 不同点位用 index 错开出发时间，形成「鱼贯」效果 */
     const t = Math.min((seconds - index * 0.2 + phase) / safeDuration, 1)
+
     if (t <= 0) {
       /* 出发前用第一段方向算 heading，避免箭头朝北待机 */
       const firstP1 = path[0]
@@ -1276,6 +1200,7 @@ function createPathFollowMove({ path = [], duration = 10, phase = 0 } = {}) {
         Number(firstP2.longitude) - Number(firstP1.longitude),
         Number(firstP2.latitude) - Number(firstP1.latitude),
       )
+
       return {
         longitude: Number(path[0].longitude),
         latitude: Number(path[0].latitude),
@@ -1292,6 +1217,7 @@ function createPathFollowMove({ path = [], duration = 10, phase = 0 } = {}) {
     const dLng = Number(p2.longitude) - Number(p1.longitude)
     const dLat = Number(p2.latitude) - Number(p1.latitude)
     const heading = Math.atan2(dLng, dLat)
+
     return {
       longitude: Number(p1.longitude) + (Number(p2.longitude) - Number(p1.longitude)) * segT,
       latitude: Number(p1.latitude) + (Number(p2.latitude) - Number(p1.latitude)) * segT,
@@ -1326,13 +1252,14 @@ const MOVE_MODE_FACTORIES = {
 function startMarkerAnimation(config = {}) {
   const { mode, ...params } = config
   const factory = MOVE_MODE_FACTORIES[mode]
+
   if (!factory) {
-    console.error(
-      `未知的运动模式: ${mode}，支持: ${Object.keys(MOVE_MODE_FACTORIES).join(' / ')}`,
-    )
+    console.error(`未知的运动模式: ${mode}，支持: ${Object.keys(MOVE_MODE_FACTORIES).join(' / ')}`)
+
     return
   }
   const moveFn = factory(params)
+
   if (!moveFn) return
   startBatchMarkersFrameUpdate(moveFn)
 }
@@ -1350,7 +1277,6 @@ function startMarkerAnimation(config = {}) {
  * removeMarker(markerObject)
  */
 function removeMarker(markerKey) {
-
   if (!viewer.value || !markerKey) {
     return false
   }
@@ -1361,17 +1287,10 @@ function removeMarker(markerKey) {
 
   const batchMarker = [...batchMarkers].find((marker) => {
     if (typeof markerKey === 'object') {
-      return (
-        marker === markerKey ||
-        marker.id === markerKey.id ||
-        marker.name === markerKey.name
-      )
+      return marker === markerKey || marker.id === markerKey.id || marker.name === markerKey.name
     }
 
-    return (
-      marker.name === markerKey ||
-      marker.id === markerKey
-    )
+    return marker.name === markerKey || marker.id === markerKey
   })
 
   if (batchMarker) {
@@ -1382,13 +1301,12 @@ function removeMarker(markerKey) {
     markerCollection.remove(batchMarker.primitive)
     batchMarkers.delete(batchMarker)
 
-    if (
-      selectedMarker.value === batchMarker
-    ) {
+    if (selectedMarker.value === batchMarker) {
       closePopup()
     }
 
     viewer.value.scene.requestRender()
+
     return true
   }
 
@@ -1399,10 +1317,8 @@ function removeMarker(markerKey) {
     typeof markerKey === 'object'
       ? markerKey
       : viewer.value.entities.values.find(
-        (item) =>
-          item.name === markerKey ||
-          item.id === markerKey,
-      )
+          (item) => item.name === markerKey || item.id === markerKey,
+        )
 
   if (entity instanceof Cesium.Entity) {
     if (selectedMarker.value === entity) {
@@ -1411,10 +1327,12 @@ function removeMarker(markerKey) {
 
     viewer.value.entities.remove(entity)
     viewer.value.scene.requestRender()
+
     return true
   }
 
   console.warn('未找到要删除的点位：', markerKey)
+
   return false
 }
 /*
@@ -1423,6 +1341,7 @@ function removeMarker(markerKey) {
 function removeMarkers(markerKeys = []) {
   if (!Array.isArray(markerKeys)) {
     console.warn('markerKeys 必须是数组')
+
     return 0
   }
 
@@ -1445,9 +1364,7 @@ onBeforeUnmount(() => {
   closePopup()
 
   if (viewer.value && screenSpaceHandler) {
-    viewer.value.scene.postRender.removeEventListener(
-      updatePopupPosition,
-    )
+    viewer.value.scene.postRender.removeEventListener(updatePopupPosition)
     screenSpaceHandler.destroy()
     screenSpaceHandler = null
   }
@@ -1499,25 +1416,25 @@ defineExpose({
   z-index: 20;
   width: 280px;
   padding: 16px;
-  color: #fff;
-  background: rgba(20, 35, 55, 0.95);
   border: 1px solid #409eff;
   border-radius: 6px;
-  box-shadow: 0 4px 16px rgb(0 0 0 / 40%);
+  background: rgb(20 35 55 / 95%);
+  color: #fff;
   transform: translateY(-100%);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 40%);
 }
 
 .popup-title {
-  padding-right: 20px;
   margin-bottom: 10px;
+  padding-right: 20px;
   color: #67c7ff;
   font-size: 17px;
   font-weight: bold;
 }
 
 .popup-content {
-  line-height: 1.6;
   font-size: 14px;
+  line-height: 1.6;
 }
 
 .popup-close {
@@ -1525,10 +1442,10 @@ defineExpose({
   top: 4px;
   right: 8px;
   padding: 0;
-  color: #fff;
-  background: transparent;
   border: 0;
-  cursor: pointer;
+  background: transparent;
+  color: #fff;
   font-size: 20px;
+  cursor: pointer;
 }
 </style>

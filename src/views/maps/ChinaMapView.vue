@@ -6,14 +6,14 @@
 </template>
 
 <script>
-import ChinaMap from '@/components/ChinaMap.vue';
+import ChinaMap from '@/components/ChinaMap.vue'
 
 export default {
   name: 'ChinaMapView',
   components: {
-    ChinaMap
-  }
-};
+    ChinaMap,
+  },
+}
 </script>
 
 <style scoped>
@@ -22,9 +22,9 @@ export default {
 }
 
 .page-title {
-  text-align: center;
   margin-bottom: 20px;
-  font-size: 24px;
   color: #333;
+  font-size: 24px;
+  text-align: center;
 }
 </style>

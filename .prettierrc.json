@@ -1,0 +1,44 @@
+{
+  "// 说明": "Prettier 配置 —— 代码格式化工具，跟 ESLint 协同工作",
+  "// 工作流": "1. eslint.config.js 里引入 eslint-plugin-prettier，把 Prettier 规则作为 ESLint 规则跑；2. eslint-config-prettier 关闭 ESLint 里跟 Prettier 冲突的格式化规则；3. 最终格式以本文件为准",
+  "// 使用": "npx prettier --write . 格式化全项目；npx prettier --check . 只检查不修改",
+
+  "semi": false,
+  "// semi": "语句末尾不加分号。Vue 项目主流风格，避免分号前意外自动缩进",
+
+  "singleQuote": true,
+  "// singleQuote": "字符串用单引号，不用双引号（更紧凑，符合主流 Vue 项目）",
+
+  "trailingComma": "all",
+  "// trailingComma": "多行对象/数组/函数参数都加尾随逗号。好处：git diff 干净（新增项只动一行，不会让上一行也改）",
+
+  "printWidth": 100,
+  "// printWidth": "单行最大宽度 100 字符。比 80 宽一点，更适配现代宽屏",
+
+  "tabWidth": 2,
+  "// tabWidth": "缩进 2 空格。Vue / JS / TS 项目主流",
+
+  "useTabs": false,
+  "// useTabs": "用空格不用 tab（跨编辑器/平台显示一致）",
+
+  "arrowParens": "always",
+  "// arrowParens": "箭头函数参数始终加括号：x => x 改成 (x) => x。好处：加参数 / 改参数不用动括号",
+
+  "bracketSpacing": true,
+  "// bracketSpacing": "对象字面量 { } 内加空格：{ a: 1 } 而不是 {a: 1}",
+
+  "bracketSameLine": false,
+  "// bracketSameLine": "HTML/Vue 标签的 > 另起一行（多属性场景更易读）",
+
+  "vueIndentScriptAndStyle": false,
+  "// vueIndentScriptAndStyle": "Vue <script> 和 <style> 标签内容不缩进（跟 Vue 官方 style guide 一致）",
+
+  "singleAttributePerLine": false,
+  "// singleAttributePerLine": "Vue 模板属性可以同行多个（不强求每行一个属性），节省垂直空间",
+
+  "htmlWhitespaceSensitivity": "ignore",
+  "// htmlWhitespaceSensitivity": "HTML 空白敏感度忽略。避免 Vue 模板里的换行被错误折叠成空格导致排版乱",
+
+  "// endOfLine": "统一换行符 LF（Unix 风格），避免 Windows 默认 CRLF 跟其他平台混用导致 git diff 噪音",
+  "endOfLine": "lf"
+}
