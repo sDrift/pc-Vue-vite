@@ -1,0 +1,85 @@
+{
+  "_README": [
+    "tileset.json 模板 — 把你的 b3dm 文件丢进本目录，改下面 content.uri 指向它即可用",
+    "所有 _xxx 开头的字段是注释，Cesium 会忽略，可保留也可删除",
+    "加载方式：调 load3DTileset(viewer, { url: '/cesium-assets/my-building/tileset.json' })",
+    "或直接打开 CesiumMapDemo 页点「加载自定义 b3dm」按钮"
+  ],
+
+  "asset": {
+    "version": "1.0",
+    "_version": "3D Tiles 规范版本，固定 1.0（b3dm 格式）。1.1 是新规范用 .glb 不用 .b3dm",
+    "tilesetVersion": "1.0",
+    "_tilesetVersion": "自定义版本号，改它会让 Cesium 重新拉瓦片（缓存失效）",
+    "gltfUpAxis": "Y",
+    "_gltfUpAxis": "b3dm 内部是 glTF，标准 Y-up，Cesium 自动转 Z-up，不用改",
+    "copyright": "your-name"
+  },
+
+  "_geometricError_root": "根瓦片几何误差（米），越大越粗略。Cesium 用 (误差/距离) 跟 maximumScreenSpaceError 对比决定加载哪个 LOD",
+  "geometricError": 500,
+
+  "root": {
+    "_root": "瓦片树根节点。多个 b3dm 时把每个 b3dm 作为子节点放 children，单 b3dm 直接放 content",
+
+    "boundingVolume": {
+      "_boundingVolume": "瓦片空间范围，Cesium 用它做视锥剔除（不在视野的瓦片不加载）",
+      "region": [
+        1.85919,
+        0.51570,
+        1.85920,
+        0.51572,
+        0,
+        100
+      ],
+      "_region": "[west, south, east, north, minHeight, maxHeight] 前 4 个是弧度，后 2 个是米。当前是重庆解放碑 (106.5781°E, 29.5486°N) 附近 0.001 度见方。度转弧度：度 × π / 180"
+    },
+
+    "geometricError": 0,
+    "_geometricError_leaf": "叶子瓦片（直接指向 b3dm 的）通常设 0，表示不可再细化",
+
+    "refine": "ADD",
+    "_refine": "细化策略：ADD（父子叠加显示，OSM Buildings 用）/ REPLACE（看到子就丢父，倾斜摄影用）",
+
+    "content": {
+      "_content": "实际数据文件引用，叶子节点必填",
+      "uri": "building.b3dm",
+      "_uri": "b3dm 文件相对路径（相对 tileset.json 所在目录）。把你自己的 b3dm 丢进本目录，改这个名字"
+    },
+
+    "transform": [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ],
+    "_transform": "4×4 变换矩阵（列优先，长度 16 数组）。单位矩阵 = 不变。要平移整个模型到新位置用这个，但通常用 boundingVolume.region 定位就够",
+
+    "children": [],
+    "_children": "子瓦片数组。多个 b3dm 时每个 b3dm 作为子节点放这里，递归结构（参考下面的 _children_example）",
+
+    "_children_example": [
+      "比如两个 b3dm：",
+      "\"children\": [",
+      "  { \"boundingVolume\": { \"region\": [...] }, \"geometricError\": 0, \"refine\": \"ADD\", \"content\": { \"uri\": \"tile1.b3dm\" } },",
+      "  { \"boundingVolume\": { \"region\": [...] }, \"geometricError\": 0, \"refine\": \"ADD\", \"content\": { \"uri\": \"tile2.b3dm\" } }",
+      "]"
+    ]
+  },
+
+  "_使用流程": [
+    "1. 把你的 building.b3dm 文件丢到本目录（跟 tileset.json 同级）",
+    "2. 改上面 content.uri 指向你的 b3dm 文件名（已经是 building.b3dm，文件名一样就不用改）",
+    "3. 改 boundingVolume.region 为你 b3dm 实际位置的经纬度范围（弧度）",
+    "4. 在前端代码调 load3DTileset(viewer, { url: '/cesium-assets/my-building/tileset.json' })",
+    "5. 或者打开 CesiumMapDemo 页点「加载自定义 b3dm」按钮"
+  ],
+
+  "_常见坑": [
+    "1. 模型飞天上/埋地下 → 改 boundingVolume.region 后两个数（minHeight/maxHeight）或在前端调 heightOffset",
+    "2. 模型位置偏移 → b3dm 内部是局部坐标，region 写错经纬度会偏。用工具转出来时让 metadata.xml 配准到 WGS84",
+    "3. 加载看不到 → boundingVolume 范围写错被视锥剔除，临时把 region 范围写大测试",
+    "4. 模型太细加载卡 → 在前端 maximumScreenSpaceError 调大到 32 或 48",
+    "5. 模型面数过多 → 用工具转换时开 Draco 几何压缩"
+  ]
+}

@@ -49,6 +49,18 @@ const modelRegistry = new Map()   // key: tag -> Model
  *       建议用相机中心或主要观察区域的坐标，参考点附近对齐最准。
  *   - show: 是否显示（默认 true）
  *   - maximumScreenSpaceError: 细节层级（默认 16，越大越粗略越省性能）
+ *
+ *   ---- 性能优化参数（按需启用）----
+ *   - cacheBytes: 瓦片缓存上限（字节，默认 536870912 = 512MB）。超出自动卸载远瓦片
+ *   - dynamicScreenSpaceError: 远距离自动放松精度（默认 false）。开启后远处瓦片加载更少
+ *   - dynamicScreenSpaceErrorDensity: 远距离放松的密度（默认 0.0024 * 1024）
+ *   - preloadWhenHidden: 不可见时也预加载（默认 false）。配合场景切换用
+ *   - preloadSiblings: 预加载兄弟瓦片（默认 false）。开启后平移相机更流畅但流量增加
+ *   - cullRequestsWhileMoving: 相机移动时跳过请求（默认 true）。避免拖拽时疯狂下载
+ *   - skipLevelOfDetail: 跳过中间 LOD（默认 false）。开启后直接跳到目标 LOD，少下载
+ *   - foveatedScreenSpaceError: 视野中心精度高、边缘低（默认 true）。省性能
+ *   - foveatedConeSize: 视野中心高精度范围（默认 0.1 = 10% 区域）
+ *   - progressiveResolutionHeightFraction: 渐进式分辨率高度比例（默认 0.3）
  * @returns {Promise<Cesium3DTileset|null>} 加载失败返回 null
  * ------------------------------------------------------------------ */
 export async function load3DTileset(viewer, options = {}) {
@@ -67,6 +79,16 @@ export async function load3DTileset(viewer, options = {}) {
     referenceLatitude,
     show = true,
     maximumScreenSpaceError = 16,
+    cacheBytes = 536870912,                          // 512MB
+    dynamicScreenSpaceError = true,                  // 远距离自动放松精度
+    dynamicScreenSpaceErrorDensity = 0.0024 * 1024,
+    preloadWhenHidden = false,
+    preloadSiblings = false,
+    cullRequestsWhileMoving = true,
+    skipLevelOfDetail = false,
+    foveatedScreenSpaceError = true,
+    foveatedConeSize = 0.3,
+    progressiveResolutionHeightFraction = 0.3,
   } = options
 
   const key = tag || (url ? `url:${url}` : `ion:${assetId}`)
@@ -82,9 +104,33 @@ export async function load3DTileset(viewer, options = {}) {
       : await Cesium.Cesium3DTileset.fromIonAssetId(assetId)
 
     tileset.show = show
-    if (typeof tileset.maximumScreenSpaceError === 'number') {
-      tileset.maximumScreenSpaceError = maximumScreenSpaceError
+
+    /* ---- 性能优化参数应用 ----
+     * 这些参数控制 Cesium 加载 3D Tiles 的策略：
+     * 1. 屏幕误差（决定加载多细）
+     * 2. 缓存预算（决定留多少内存）
+     * 3. 视野中心高精度 / 边缘低精度
+     * 4. 相机移动时跳过请求
+     * 5. 远距离自动放松精度（动态屏幕误差）
+     * 6. 跳过中间 LOD 层级
+     * 全部安全赋值：Cesium 各版本字段可能不存在，typeof 守卫防报错 */
+    const assign = (target, key, val) => {
+      // eslint-disable-next-line no-prototype-builtins
+      if (typeof target[key] !== 'undefined' && val !== undefined) {
+        target[key] = val
+      }
     }
+    assign(tileset, 'maximumScreenSpaceError', maximumScreenSpaceError)
+    assign(tileset, 'cacheBytes', cacheBytes)
+    assign(tileset, 'dynamicScreenSpaceError', dynamicScreenSpaceError)
+    assign(tileset, 'dynamicScreenSpaceErrorDensity', dynamicScreenSpaceErrorDensity)
+    assign(tileset, 'preloadWhenHidden', preloadWhenHidden)
+    assign(tileset, 'preloadSiblings', preloadSiblings)
+    assign(tileset, 'cullRequestsWhileMoving', cullRequestsWhileMoving)
+    assign(tileset, 'skipLevelOfDetail', skipLevelOfDetail)
+    assign(tileset, 'foveatedScreenSpaceError', foveatedScreenSpaceError)
+    assign(tileset, 'foveatedConeSize', foveatedConeSize)
+    assign(tileset, 'progressiveResolutionHeightFraction', progressiveResolutionHeightFraction)
 
     /* 调试日志：打印 tileset 的关键状态，便于排查
      * "normalized result is not a number" 错误来源。

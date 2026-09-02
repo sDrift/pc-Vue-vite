@@ -893,8 +893,8 @@ function addMarkers(markerList = []) {
       // 点位三维坐标
       position,
 
-      // 图片地址
-      image: markerImage,
+      // 图片地址：支持每个点位自定义图标，未传则用默认 markerImage
+      image: item.image || markerImage,
 
       // 图片显示大小
       width: Number(item.width) || 32,
@@ -1101,6 +1101,28 @@ function startBatchMarkersFrameUpdate(updateCallback) {
       )
 
       marker.primitive.position = marker.position
+
+      /*
+       * 应用箭头朝向（可选）。
+       * 工厂函数返回的 nextPosition 可能带 heading 字段（弧度，
+       * 0=北，π/2=东，正值顺时针，Cesium heading 约定）。
+       *
+       * billboard.rotation 是绕 alignedAxis 的弧度，正值逆时针，
+       * 跟 heading 方向相反，所以取负。
+       *
+       * billboard.rotation 默认只在 2D 模式生效；3D 模式必须把
+       * alignedAxis 设为非零向量（用 UNIT_Z = 世界 Z 轴朝上）才能
+       * 让 rotation 生效。代价是 billboard 不再始终面向相机，会
+       * 变成贴在地面绕 Z 轴旋转的图标，俯视看是箭头朝向运动方向。
+       */
+      if (
+        typeof nextPosition.heading === 'number' &&
+        Number.isFinite(nextPosition.heading) &&
+        marker.primitive
+      ) {
+        marker.primitive.rotation = -nextPosition.heading
+        marker.primitive.alignedAxis = Cesium.Cartesian3.UNIT_Z
+      }
     })
     viewer.value.scene.requestRender()
   }
@@ -1123,6 +1145,22 @@ function stopBatchMarkersFrameUpdate() {
     )
 
     batchFrameUpdateHandler = null
+
+    /*
+     * 复位所有点位的 billboard 朝向属性。
+     * loopPath/pathFollow 模式会把 alignedAxis 设为 UNIT_Z 让箭头
+     * 朝向运动方向，停止后切到其他模式（oscillate/circle）时，
+     * 这些点位如果保持 UNIT_Z 会变成贴地不面向相机的图标，
+     * 跟新模式（不返回 heading，保持面向相机）不一致。
+     * 这里统一复位，保证下次启动任意模式时点位都是干净的初始状态。
+     */
+    batchMarkers.forEach((marker) => {
+      if (marker.primitive) {
+        marker.primitive.rotation = 0
+        marker.primitive.alignedAxis = Cesium.Cartesian3.ZERO
+      }
+    })
+    viewer.value.scene.requestRender()
   }
 }
 
@@ -1205,10 +1243,15 @@ function createLoopPathMove({ path = [], duration = 10, phase = 0 } = {}) {
     const segT = segFloat - Math.floor(segFloat)
     const p1 = path[segIndex]
     const p2 = path[(segIndex + 1) % segCount]
+    /* 算当前段方向作为箭头朝向（弧度，0=北，π/2=东，正值顺时针） */
+    const dLng = Number(p2.longitude) - Number(p1.longitude)
+    const dLat = Number(p2.latitude) - Number(p1.latitude)
+    const heading = Math.atan2(dLng, dLat)
     return {
       longitude: Number(p1.longitude) + (Number(p2.longitude) - Number(p1.longitude)) * segT,
       latitude: Number(p1.latitude) + (Number(p2.latitude) - Number(p1.latitude)) * segT,
       height: Number(marker.originalHeight) || 0,
+      heading,
     }
   }
 }
@@ -1226,10 +1269,18 @@ function createPathFollowMove({ path = [], duration = 10, phase = 0 } = {}) {
     /* 不同点位用 index 错开出发时间，形成「鱼贯」效果 */
     const t = Math.min((seconds - index * 0.2 + phase) / safeDuration, 1)
     if (t <= 0) {
+      /* 出发前用第一段方向算 heading，避免箭头朝北待机 */
+      const firstP1 = path[0]
+      const firstP2 = path[1]
+      const heading = Math.atan2(
+        Number(firstP2.longitude) - Number(firstP1.longitude),
+        Number(firstP2.latitude) - Number(firstP1.latitude),
+      )
       return {
         longitude: Number(path[0].longitude),
         latitude: Number(path[0].latitude),
         height: Number(marker.originalHeight) || 0,
+        heading,
       }
     }
     const segFloat = t * lastSeg
@@ -1237,10 +1288,15 @@ function createPathFollowMove({ path = [], duration = 10, phase = 0 } = {}) {
     const segT = segFloat - segIndex
     const p1 = path[segIndex]
     const p2 = path[segIndex + 1]
+    /* 算当前段方向作为箭头朝向（弧度，0=北，π/2=东，正值顺时针） */
+    const dLng = Number(p2.longitude) - Number(p1.longitude)
+    const dLat = Number(p2.latitude) - Number(p1.latitude)
+    const heading = Math.atan2(dLng, dLat)
     return {
       longitude: Number(p1.longitude) + (Number(p2.longitude) - Number(p1.longitude)) * segT,
       latitude: Number(p1.latitude) + (Number(p2.latitude) - Number(p1.latitude)) * segT,
       height: Number(marker.originalHeight) || 0,
+      heading,
     }
   }
 }

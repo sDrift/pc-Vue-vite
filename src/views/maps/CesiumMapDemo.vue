@@ -44,6 +44,16 @@
         </button>
         <span class="demo-tip">需先「批量添加点位」，停止统一用「停止批量点位帧更新」</span>
       </div>
+      <!-- 箭头点位沿路径移动：20 个箭头图标点位，沿解放碑→洪崖洞→朝天门循环移动 -->
+      <div class="demo-actions">
+        <button class="demo-btn" @click="handleAddArrowMarkers">
+          加载 20 个箭头沿路径移动
+        </button>
+        <button class="demo-btn" @click="handleRemoveArrowMarkers">
+          移除箭头点位
+        </button>
+        <span class="demo-tip">沿解放碑→洪崖洞→朝天门循环移动，停止用「停止批量点位帧更新」</span>
+      </div>
       <!-- 3D 模型演示：调用 cesiumModels.js 工具模块（独立于 CesiumMap 组件） -->
       <div class="demo-actions">
         <button class="demo-btn" @click="handleLoad3DBuildings">
@@ -59,6 +69,16 @@
           移除飞机模型
         </button>
         <span class="demo-tip">依赖 ion token（见 .env VITE_CESIUM_ION_TOKEN）</span>
+      </div>
+      <!-- 自定义 b3dm 演示：加载 public/cesium-assets/my-building/tileset.json 模板 -->
+      <div class="demo-actions">
+        <button class="demo-btn" @click="handleLoadCustomB3dm">
+          加载自定义 b3dm（模板）
+        </button>
+        <button class="demo-btn" @click="handleRemoveCustomB3dm">
+          移除自定义 b3dm
+        </button>
+        <span class="demo-tip">把 b3dm 丢到 public/cesium-assets/my-building/，改 tileset.json 的 uri 即可用</span>
       </div>
       <div class="demo-actions">
         <div v-for="m in markers" :key="m.name">
@@ -308,6 +328,110 @@ const handleLoadAircraft = async () => {
 const handleRemoveAircraft = () => {
   if (!mapRef.value?.viewer) return
   removeModel(mapRef.value.viewer, AIRCRAFT_TAG)
+}
+
+/* ==================== 自定义 b3dm 演示 ====================
+ * 加载 public/cesium-assets/my-building/tileset.json 模板。
+ * 这是 3D Tiles 1.0 的标准入口清单文件，里面引用一个 b3dm 文件。
+ * 用法：
+ *   1. 把你的 building.b3dm 文件丢到 public/cesium-assets/my-building/
+ *   2. 改 tileset.json 里的 content.uri 指向你的文件名
+ *   3. 改 boundingVolume.region 为你 b3dm 实际位置的经纬度范围
+ *   4. 点本按钮加载（或调 load3DTileset(viewer, { url: '...' })）
+ * 模板文件含详细注释，每个字段都有 _xxx 注解说明作用。
+ */
+const CUSTOM_B3DM_TAG = 'custom-b3dm'
+
+const handleLoadCustomB3dm = async () => {
+  if (!mapRef.value?.viewer) return
+  const tileset = await load3DTileset(mapRef.value.viewer, {
+    tag: CUSTOM_B3DM_TAG,
+    url: '/cesium-assets/my-building/tileset.json', // 相对 public 的路径
+    heightOffset: 0, // 模型整体抬高/降低（米），按需调整
+    maximumScreenSpaceError: 16,
+  })
+  if (tileset) {
+    flyToObject(mapRef.value.viewer, tileset, {
+      height: 500,
+      heading: 0,
+      pitch: -45,
+      fallbackLongitude: 106.5781,
+      fallbackLatitude: 29.5486,
+    })
+  }
+}
+
+const handleRemoveCustomB3dm = () => {
+  if (!mapRef.value?.viewer) return
+  remove3DTileset(mapRef.value.viewer, CUSTOM_B3DM_TAG)
+}
+
+/* ==================== 箭头点位沿路径移动 ====================
+ * 加载 20 个箭头图标点位，沿「解放碑→洪崖洞→朝天门」3 点路径循环移动。
+ * 用 SVG 构造红色箭头图标作为 data URI，不依赖任何外部图片资源。
+ * 路径取自现有 10 个地标里的 3 个。
+ */
+
+/* 箭头图标：红色三角形 + 白色描边，向上指 */
+const arrowImage =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">' +
+    '<path d="M16 2 L30 28 L16 22 L2 28 Z" fill="#ff4444" stroke="#ffffff" stroke-width="1.5"/>' +
+    '</svg>',
+  )
+
+/* 路径：从 10 个地标里选 3 个作为循环移动路径 */
+const ARROW_MOVING_PATH = [
+  { longitude: 106.5781, latitude: 29.5486 }, // 解放碑
+  { longitude: 106.5777, latitude: 29.5673 }, // 洪崖洞
+  { longitude: 106.5870, latitude: 29.5680 }, // 朝天门
+]
+
+const arrowMarkers = ref([]) // 保存 20 个箭头点位，便于后续删除
+
+/* 加载 20 个箭头点位并启动路径循环移动
+ * - 初始位置：从解放碑附近错开排列，让 20 个点位在路径上分散开
+ * - 图标：用 arrowImage 红色箭头
+ * - 动画：调 startMarkerAnimation 的 loopPath 模式，沿 3 点路径循环
+ * - 相位错开：startMarkerAnimation 内部会按 index 加相位偏移，
+ *   20 个点位不会重叠成一团，会形成「箭头队列」沿路径流动的效果
+ */
+const handleAddArrowMarkers = () => {
+  if (!mapRef.value) return
+  handleRemoveArrowMarkers() // 先清理已有箭头点位，避免重复添加
+
+  const start = ARROW_MOVING_PATH[0]
+  const arr = []
+  for (let i = 0; i < 20; i++) {
+    // 初始位置：在路径起点（解放碑）附近小范围错开，避免 20 个点位完全重叠
+    arr.push({
+      name: `箭头-${i + 1}`,
+      longitude: start.longitude + (Math.random() - 0.5) * 0.001,
+      latitude: start.latitude + (Math.random() - 0.5) * 0.001,
+      height: 50,
+      image: arrowImage,
+      width: 24,
+      height: 24, // 略小于默认 32，避免 20 个箭头互相遮挡
+      description: `<p>箭头点位 #${i + 1}，沿解放碑→洪崖洞→朝天门循环移动</p>`,
+    })
+  }
+  arrowMarkers.value = arr
+  mapRef.value.addMarkers(arr)
+
+  // 启动循环路径动画
+  mapRef.value.startMarkerAnimation({
+    mode: 'loopPath',
+    duration: 18, // 一圈 18 秒，配合 20 个点位的相位错开形成流动效果
+    path: ARROW_MOVING_PATH,
+  })
+}
+
+const handleRemoveArrowMarkers = () => {
+  if (!mapRef.value) return
+  mapRef.value.stopBatchMarkersFrameUpdate() // 先停止动画
+  mapRef.value.removeMarkers(arrowMarkers.value.map((m) => m.name))
+  arrowMarkers.value = []
 }
 
 /* 页面卸载时清理所有 3D 模型，防止 primitives 堆积 */
