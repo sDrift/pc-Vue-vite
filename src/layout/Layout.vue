@@ -7,8 +7,8 @@
       <el-menu
         :default-active="activeMenu"
         class="el-menu-vertical-demo"
-        @select="handleMenuSelect"
         router
+        @select="handleMenuSelect"
       >
         <template v-for="route in menuRoutes" :key="route.path">
           <!-- 无子菜单的路由 -->
@@ -19,12 +19,9 @@
             <component :is="route.meta.icon" />
             <template #title>{{ route.meta.title }}</template>
           </el-menu-item>
-          
+
           <!-- 有子菜单的路由 -->
-          <el-sub-menu
-            v-else
-            :index="route.path"
-          >
+          <el-sub-menu v-else :index="route.path">
             <template #title>
               <component :is="route.meta.icon" />
               <span>{{ route.meta.title }}</span>
@@ -44,12 +41,14 @@
       <header class="header">
         <div class="header-left">
           <el-button type="text" @click="toggleSidebar">
-            <el-icon><Menu /></el-icon></el-button>
+            <el-icon><Menu /></el-icon>
+          </el-button>
         </div>
         <div class="header-right">
           <el-dropdown>
             <span class="user-info">
-              <el-icon><User /></el-icon> {{ userInfo?.username || '管理员' }}
+              <el-icon><User /></el-icon>
+              {{ userInfo?.username || '管理员' }}
             </span>
             <template #dropdown>
               <el-dropdown-menu>
@@ -67,12 +66,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { useUserStore } from '../store/modules/user';
-import { Menu, User } from '@element-plus/icons-vue';
-import * as ElementPlusIconsVue from '@element-plus/icons-vue';
-import { loadDynamicRoutes, resetDynamicRoutes } from '../router/index.js';
+import { Menu, User } from '@element-plus/icons-vue'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+
+import { loadDynamicRoutes, resetDynamicRoutes } from '../router/index.js'
+import { useUserStore } from '../store/modules/user'
 // 确保所有必要的Element Plus图标都已注册
 
 // 注册Element Plus图标
@@ -88,7 +88,7 @@ const icons = {
   'el-icon-document-copy': ElementPlusIconsVue.DocumentCopy,
   'el-icon-cloud-rain': ElementPlusIconsVue.DataLine,
   'el-icon-data-table': ElementPlusIconsVue.DataLine,
-};
+}
 
 // 创建组件对象
 const components = {
@@ -103,64 +103,65 @@ const components = {
   'el-icon-document-copy': icons['el-icon-document-copy'],
   'el-icon-cloud-rain': icons['el-icon-cloud-rain'],
   'el-icon-data-table': icons['el-icon-data-table'],
-};
+}
 
 // 获取路由和用户store
-const router = useRouter();
-const route = useRoute();
-const userStore = useUserStore();
+const router = useRouter()
+const route = useRoute()
+const userStore = useUserStore()
 
 // 侧边栏状态
-const isSidebarOpen = ref(true);
+const isSidebarOpen = ref(true)
 
 /*
  * 菜单数据：静态基础路由 + 动态接口下发的路由。
  * 初始化时先放静态基础路由（Dashboard/Users/Products/Settings/...），
  * onMounted 里拉取动态路由后追加到数组末尾，触发菜单响应式更新。
  */
-const staticChildren = router.options.routes.find(r => r.name === 'Layout')?.children || [];
-const menuRoutes = ref([...staticChildren]);
+const staticChildren = router.options.routes.find((r) => r.name === 'Layout')?.children || []
+const menuRoutes = ref([...staticChildren])
 
 // 当前激活的菜单
 const activeMenu = computed(() => {
-  return route.path;
-});
+  return route.path
+})
 
 // 用户信息
 const userInfo = computed(() => {
-  return userStore.userInfo;
-});
+  return userStore.userInfo
+})
 
 // 切换侧边栏
 const toggleSidebar = () => {
-  isSidebarOpen.value = !isSidebarOpen.value;
-};
+  isSidebarOpen.value = !isSidebarOpen.value
+}
 
 // 处理菜单选择
 const handleMenuSelect = (index) => {
-  router.push(index);
-};
+  router.push(index)
+}
 
 // 处理登出
 const handleLogout = () => {
-  userStore.logout();
-  resetDynamicRoutes();      // 清掉动态路由加载标记，下次登录重新拉接口
-  menuRoutes.value = [];    // 清空菜单，避免登出后菜单残留
-  router.push('/login');
-};
+  userStore.logout()
+  resetDynamicRoutes() // 清掉动态路由加载标记，下次登录重新拉接口
+  menuRoutes.value = [] // 清空菜单，避免登出后菜单残留
+  router.push('/login')
+}
 
 // 组件挂载时加载用户信息 + 拉取动态路由
 onMounted(async () => {
-  userStore.loadUserInfo();
+  userStore.loadUserInfo()
   try {
-    const dynamicRoutes = await loadDynamicRoutes();
+    const dynamicRoutes = await loadDynamicRoutes()
+
     // 把接口下发的动态路由追加到菜单末尾，触发响应式更新
-    menuRoutes.value = [...staticChildren, ...dynamicRoutes];
-    console.log('动态路由加载成功:', dynamicRoutes);
+    menuRoutes.value = [...staticChildren, ...dynamicRoutes]
+    console.log('动态路由加载成功:', dynamicRoutes)
   } catch (err) {
-    console.error('动态路由加载失败:', err);
+    console.error('动态路由加载失败:', err)
   }
-});
+})
 </script>
 
 <style scoped>
@@ -270,11 +271,11 @@ onMounted(async () => {
 }
 
 :deep(.el-sub-menu__title:hover) {
-  background-color: #34495e ;
+  background-color: #34495e;
   color: white !important;
 }
 
-.el-sub-menu.is-active{
+.el-sub-menu.is-active {
   background-color: #34495e;
   color: white !important;
 }

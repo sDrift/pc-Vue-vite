@@ -105,7 +105,9 @@ export default [
           alphabetize: { order: 'asc', caseInsensitive: true },
         },
       ],
-      'import-x/no-unresolved': 'off',     // Vite alias 由打包器解析，不严格要求
+      'import-x/no-unresolved': 'off',
+              'import-x/namespace': 'off',
+              'import-x/named': 'off',     // Vite alias 由打包器解析，不严格要求
       'import-x/no-duplicates': 'warn',    // 同一模块重复 import 警告
       'import-x/no-unused-modules': 'off',  // Vue 路由动态 import 解决，不强求
     },

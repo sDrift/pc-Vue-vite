@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-import NetworkFlowMap from '@/components/NetworkFlowMap.vue';
+import NetworkFlowMap from '@/components/NetworkFlowMap.vue'
 </script>
 
 <style scoped>

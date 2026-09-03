@@ -26,11 +26,12 @@
  * ==================================================================== */
 
 import * as Cesium from 'cesium'
+
 import { getGcj02EcefDelta } from './coordTransform.js'
 
 /* 内部缓存：记录已加载的资产，便于按 id 移除 */
 const tilesetRegistry = new Map() // key: tag -> Cesium3DTileset
-const modelRegistry = new Map()   // key: tag -> Model
+const modelRegistry = new Map() // key: tag -> Model
 
 /* ------------------------------------------------------------------
  * 3D Tiles：加载城市建筑等大规模切片数据
@@ -66,6 +67,7 @@ const modelRegistry = new Map()   // key: tag -> Model
 export async function load3DTileset(viewer, options = {}) {
   if (!viewer) {
     console.warn('[cesiumModels] viewer 为空，无法加载 3D Tiles')
+
     return null
   }
 
@@ -79,8 +81,8 @@ export async function load3DTileset(viewer, options = {}) {
     referenceLatitude,
     show = true,
     maximumScreenSpaceError = 16,
-    cacheBytes = 536870912,                          // 512MB
-    dynamicScreenSpaceError = true,                  // 远距离自动放松精度
+    cacheBytes = 536870912, // 512MB
+    dynamicScreenSpaceError = true, // 远距离自动放松精度
     dynamicScreenSpaceErrorDensity = 0.0024 * 1024,
     preloadWhenHidden = false,
     preloadSiblings = false,
@@ -115,11 +117,11 @@ export async function load3DTileset(viewer, options = {}) {
      * 6. 跳过中间 LOD 层级
      * 全部安全赋值：Cesium 各版本字段可能不存在，typeof 守卫防报错 */
     const assign = (target, key, val) => {
-      // eslint-disable-next-line no-prototype-builtins
       if (typeof target[key] !== 'undefined' && val !== undefined) {
         target[key] = val
       }
     }
+
     assign(tileset, 'maximumScreenSpaceError', maximumScreenSpaceError)
     assign(tileset, 'cacheBytes', cacheBytes)
     assign(tileset, 'dynamicScreenSpaceError', dynamicScreenSpaceError)
@@ -136,6 +138,7 @@ export async function load3DTileset(viewer, options = {}) {
      * "normalized result is not a number" 错误来源。
      * 重点看 boundingSphere.center 是否是 (0,0,0)（说明 tileset 未 ready） */
     const bs = tileset.boundingSphere
+
     console.log('[cesiumModels] tileset 状态:', {
       assetId: assetId || url,
       ready: !!bs,
@@ -147,15 +150,16 @@ export async function load3DTileset(viewer, options = {}) {
     let failedCount = 0
     const tileFailedListener = tileset.tileFailed.addEventListener((err) => {
       failedCount += 1
-      console.warn(`[cesiumModels] tile 加载失败 (${failedCount}):`,
-        err?.url || err?.message || err)
+      console.warn(
+        `[cesiumModels] tile 加载失败 (${failedCount}):`,
+        err?.url || err?.message || err,
+      )
       if (failedCount >= 3) {
-        console.error(
-          '[cesiumModels] 3D Tiles 多次加载失败，自动移除 tileset。'
-        )
+        console.error('[cesiumModels] 3D Tiles 多次加载失败，自动移除 tileset。')
         remove3DTileset(viewer, tileset)
       }
     })
+
     tileset._tileFailedListener = tileFailedListener
 
     /* 监听 scene.renderError：render 抛错时触发（含 normalize NaN 错误）。
@@ -166,6 +170,7 @@ export async function load3DTileset(viewer, options = {}) {
       remove3DTileset(viewer, tileset)
       scene.renderError.removeEventListener(renderErrorListener)
     }
+
     viewer.scene.renderError.addEventListener(renderErrorListener)
     tileset._renderErrorListener = renderErrorListener
 
@@ -174,24 +179,23 @@ export async function load3DTileset(viewer, options = {}) {
 
     // 高度偏移
     if (heightOffset !== 0 && tileset.boundingSphere) {
-      const cartographic = Cesium.Cartographic.fromCartesian(
-        tileset.boundingSphere.center
-      )
+      const cartographic = Cesium.Cartographic.fromCartesian(tileset.boundingSphere.center)
       const surface = Cesium.Cartesian3.fromRadians(
         cartographic.longitude,
         cartographic.latitude,
-        0
+        0,
       )
       const offsetPosition = Cesium.Cartesian3.fromRadians(
         cartographic.longitude,
         cartographic.latitude,
-        heightOffset
+        heightOffset,
       )
       const translation = Cesium.Cartesian3.subtract(
         offsetPosition,
         surface,
-        new Cesium.Cartesian3()
+        new Cesium.Cartesian3(),
       )
+
       tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation)
     }
 
@@ -202,20 +206,22 @@ export async function load3DTileset(viewer, options = {}) {
      * - 不在国内（outOfChina）时 coordTransform 会返回零向量，无副作用 */
     if (applyGcj02 && referenceLongitude !== undefined && referenceLatitude !== undefined) {
       const delta = getGcj02EcefDelta(Cesium, referenceLongitude, referenceLatitude)
-      console.log('[cesiumModels] GCJ-02 偏移量（ECEF）:',
-        `[${delta.x}, ${delta.y}, ${delta.z}]`)
+
+      console.log('[cesiumModels] GCJ-02 偏移量（ECEF）:', `[${delta.x}, ${delta.y}, ${delta.z}]`)
       // 注意：用 multiply 累积变换，兼容前面 heightOffset 已设的 modelMatrix
       const offsetMatrix = Cesium.Matrix4.fromTranslation(delta)
+
       tileset.modelMatrix = Cesium.Matrix4.multiply(
         tileset.modelMatrix,
         offsetMatrix,
-        new Cesium.Matrix4()
+        new Cesium.Matrix4(),
       )
     }
 
     return tileset
   } catch (err) {
     console.error('[cesiumModels] 加载 3D Tiles 失败:', err)
+
     return null
   }
 }
@@ -229,6 +235,7 @@ export function remove3DTileset(viewer, tilesetOrTag) {
 
   let tileset = null
   let key = null
+
   if (typeof tilesetOrTag === 'string') {
     tileset = tilesetRegistry.get(tilesetOrTag)
     key = tilesetOrTag
@@ -236,7 +243,10 @@ export function remove3DTileset(viewer, tilesetOrTag) {
     tileset = tilesetOrTag
     // 反查 tag
     for (const [k, v] of tilesetRegistry) {
-      if (v === tileset) { key = k; break }
+      if (v === tileset) {
+        key = k
+        break
+      }
     }
   }
   if (!tileset) return
@@ -290,6 +300,7 @@ export function remove3DTileset(viewer, tilesetOrTag) {
 export async function loadModel(viewer, options = {}) {
   if (!viewer) {
     console.warn('[cesiumModels] viewer 为空，无法加载模型')
+
     return null
   }
 
@@ -308,31 +319,28 @@ export async function loadModel(viewer, options = {}) {
 
   if (longitude === undefined || latitude === undefined) {
     console.warn('[cesiumModels] 缺少 longitude/latitude，无法定位模型')
+
     return null
   }
 
   const key = tag || (url ? `url:${url}` : `ion:${assetId}`)
+
   if (modelRegistry.has(key)) {
     removeModel(viewer, modelRegistry.get(key))
   }
 
   try {
     // 模型资源 URL：优先本地 url，否则走 ion 资产
-    const modelUrl = url
-      ? url
-      : Cesium.IonResource.fromAssetId(assetId, { type: 'model' })
+    const modelUrl = url ? url : Cesium.IonResource.fromAssetId(assetId, { type: 'model' })
 
     // Entity 形式：position + orientation（四元数）即可定位+朝向
     const position = Cesium.Cartesian3.fromDegrees(longitude, latitude, height)
     const hpr = new Cesium.HeadingPitchRoll(
       Cesium.Math.toRadians(heading),
       Cesium.Math.toRadians(pitch),
-      Cesium.Math.toRadians(roll)
+      Cesium.Math.toRadians(roll),
     )
-    const orientation = Cesium.Transforms.headingPitchRollQuaternion(
-      position,
-      hpr
-    )
+    const orientation = Cesium.Transforms.headingPitchRollQuaternion(position, hpr)
 
     /* Entity model 配置：
      *   - 不设 minimumPixelSize：该属性会让 Cesium 根据像素反算世界尺寸，
@@ -353,9 +361,11 @@ export async function loadModel(viewer, options = {}) {
     })
 
     modelRegistry.set(key, entity)
+
     return entity
   } catch (err) {
     console.error('[cesiumModels] 加载 glTF 模型失败:', err)
+
     return null
   }
 }
@@ -369,13 +379,17 @@ export function removeModel(viewer, modelOrTag) {
 
   let entity = null
   let key = null
+
   if (typeof modelOrTag === 'string') {
     entity = modelRegistry.get(modelOrTag)
     key = modelOrTag
   } else {
     entity = modelOrTag
     for (const [k, v] of modelRegistry) {
-      if (v === entity) { key = k; break }
+      if (v === entity) {
+        key = k
+        break
+      }
     }
   }
   if (!entity) return
@@ -427,8 +441,10 @@ export async function flyToObject(viewer, obj, options = {}) {
     // Entity 形式：直接从 position 拿经纬度
     if (obj.position) {
       const cartesian = obj.position.getValue(viewer.clock.currentTime)
+
       if (cartesian) {
         const carto = Cesium.Cartographic.fromCartesian(cartesian)
+
         longitude = Cesium.Math.toDegrees(carto.longitude)
         latitude = Cesium.Math.toDegrees(carto.latitude)
       }
@@ -438,6 +454,7 @@ export async function flyToObject(viewer, obj, options = {}) {
       // 检测 center 是否在地心附近（≈0）：判断 |center| 是否远小于地球半径
       const mag = Math.sqrt(center.x * center.x + center.y * center.y + center.z * center.z)
       const EARTH_RADIUS = 6378137
+
       if (mag < EARTH_RADIUS * 0.1) {
         // center 在地心附近（全球数据集如 OSM Buildings），
         // 转 Cartographic 会得到 (0,0) 没意义，用 fallback
@@ -447,6 +464,7 @@ export async function flyToObject(viewer, obj, options = {}) {
         }
       } else {
         const carto = Cesium.Cartographic.fromCartesian(center)
+
         longitude = Cesium.Math.toDegrees(carto.longitude)
         latitude = Cesium.Math.toDegrees(carto.latitude)
       }
@@ -458,6 +476,7 @@ export async function flyToObject(viewer, obj, options = {}) {
         destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, flyHeight),
         duration,
       }
+
       if (options.heading !== undefined || options.pitch !== undefined) {
         flyToOptions.orientation = {
           heading: Cesium.Math.toRadians(options.heading ?? 0),
@@ -483,10 +502,14 @@ export async function flyToObject(viewer, obj, options = {}) {
 export function clearAllModels(viewer) {
   if (!viewer) return
   tilesetRegistry.forEach((tileset) => {
-    try { viewer.scene.primitives.remove(tileset) } catch (e) {}
+    try {
+      viewer.scene.primitives.remove(tileset)
+    } catch (e) {}
   })
   modelRegistry.forEach((entity) => {
-    try { viewer.entities.remove(entity) } catch (e) {}
+    try {
+      viewer.entities.remove(entity)
+    } catch (e) {}
   })
   tilesetRegistry.clear()
   modelRegistry.clear()

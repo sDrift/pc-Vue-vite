@@ -11,17 +11,19 @@
           </el-space>
         </div>
       </template>
-      
+
       <div ref="canvasContainer" class="canvas-container">
         <!-- 点击命中信息 -->
         <div v-if="lastHit" class="hit-panel">
           <div class="hit-title">🎯 你点击到了立方体</div>
-          <div class="hit-row"><span>编号：</span><b>{{ lastHit.index + 1 }}</b></div>
+          <div class="hit-row">
+            <span>编号：</span>
+            <b>{{ lastHit.index + 1 }}</b>
+          </div>
           <div class="hit-row">
             <span>位置：</span>
             <b>
-              ({{ lastHit.position.x.toFixed(2) }},
-              {{ lastHit.position.y.toFixed(2) }},
+              ({{ lastHit.position.x.toFixed(2) }}, {{ lastHit.position.y.toFixed(2) }},
               {{ lastHit.position.z.toFixed(2) }})
             </b>
           </div>
@@ -40,7 +42,7 @@
           </el-button>
         </div>
       </div>
-      
+
       <div class="info-panel">
         <el-row>
           <el-col :span="8">
@@ -68,19 +70,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 
-const canvasContainer = ref(null);
-let scene, camera, renderer, controls;
-let cubes = [];
-let animationId = null;
+const canvasContainer = ref(null)
+let scene, camera, renderer, controls
+let cubes = []
+let animationId = null
 
-const cubeCount = ref(0);
-const isRotating = ref(true);
-const rotationSpeed = ref(0.01);
-const sceneSize = ref(10);
+const cubeCount = ref(0)
+const isRotating = ref(true)
+const rotationSpeed = ref(0.01)
+const sceneSize = ref(10)
 
 /* ========== 点击拾取相关 ==========
  *
@@ -94,12 +96,12 @@ const sceneSize = ref(10);
  *   4. raycaster.intersectObjects(objects) 得到被射线命中的物体
  *   5. intersects[0] 是最近的命中；读取 .object / .point / .face / .uv 等
  */
-let raycaster = null;      // 射线实例
-let mouseNDC = null;       // 存设备坐标
-let highlightedCube = null; // 当前高亮的立方体
-let highlightBakColor = null; // 原来的颜色(恢复用)
+let raycaster = null // 射线实例
+let mouseNDC = null // 存设备坐标
+let highlightedCube = null // 当前高亮的立方体
+let highlightBakColor = null // 原来的颜色(恢复用)
 
-const lastHit = ref(null); // 展示给 UI 的命中信息
+const lastHit = ref(null) // 展示给 UI 的命中信息
 
 /**
  * initScene — Three.js 场景初始化入口
@@ -111,10 +113,10 @@ const lastHit = ref(null); // 展示给 UI 的命中信息
  *   animate() / handleResize() : 同文件下的辅助函数，最后启动渲染循环 & 注册 resize
  */
 const initScene = () => {
-  if (!canvasContainer.value) return;
+  if (!canvasContainer.value) return
 
-  const W = canvasContainer.value.clientWidth;
-  const H = canvasContainer.value.clientHeight;
+  const W = canvasContainer.value.clientWidth
+  const H = canvasContainer.value.clientHeight
 
   /* ======================================================================
    * 1) Scene — 场景（所有物体 / 灯光 / 相机的根容器）
@@ -123,9 +125,9 @@ const initScene = () => {
    *      scene.background : 背景颜色(THREE.Color) / 纹理 / null(透明)
    *      scene.fog        : 雾效果，如 new THREE.Fog(0xffffff, 10, 200)
    * ====================================================================== */
-  scene = new THREE.Scene();
+  scene = new THREE.Scene()
   // 参数(0xf0f0f0): 颜色值，可以是 0xRRGGBB 数字 / '#ffffff' 字符串 / {r,g,b} 对象
-  scene.background = new THREE.Color(0xf0f0f0);
+  scene.background = new THREE.Color(0xf0f0f0)
 
   /* ======================================================================
    * 2) PerspectiveCamera — 透视相机（人眼/普通 3D 视角）
@@ -136,13 +138,13 @@ const initScene = () => {
    *      far    : 远裁剪面，比这个更远的物体不渲染
    * ====================================================================== */
   camera = new THREE.PerspectiveCamera(
-    75,              // ← fov       : 75° 视场角
-    W / H,           // ← aspect    : 画布宽高比
-    0.1,             // ← near      : 近裁剪面 0.1 单位
-    1000             // ← far       : 远裁剪面 1000 单位
-  );
+    75, // ← fov       : 75° 视场角
+    W / H, // ← aspect    : 画布宽高比
+    0.1, // ← near      : 近裁剪面 0.1 单位
+    1000, // ← far       : 远裁剪面 1000 单位
+  )
   // 默认相机在 (0,0,0) 朝 -z 方向，必须拉开距离才能看到原点附近的物体
-  camera.position.z = 15;
+  camera.position.z = 15
 
   /* ======================================================================
    * 3) WebGLRenderer — WebGL 渲染器（真正把 scene+camera 画到 canvas 的东西）
@@ -160,19 +162,19 @@ const initScene = () => {
    *      domElement          : 内部的 <canvas> DOM，需要 appendChild 到页面
    * ====================================================================== */
   renderer = new THREE.WebGLRenderer({
-    antialias: true,     // ← 参数1: 抗锯齿
+    antialias: true, // ← 参数1: 抗锯齿
     // alpha: true,       // ← 可选: 允许 canvas 透明
     // powerPreference: 'high-performance',  // ← 可选: 提示用高性能 GPU
-  });
+  })
   // 【新增】高分屏适配：取 devicePixelRatio，上限 2 避免移动端 3x DPR 性能爆炸
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
+  renderer.setSize(W, H)
   // 你选中的这一行：把 WebGLRenderer 内部生成的 <canvas> 插到容器里
   // ⚠️ 注意 1) 事件监听要绑定到 renderer.domElement（也就是这根 canvas），
   //        而不是 canvasContainer — 因为容器上还有 UI 层。
   //        另外 OrbitControls 也是绑的这根，所以想"点击但不触发拖拽"，
   //        可以在 click 后判断鼠标位移(<3px)再拾取，这里用最简单的 click 即可。
-  canvasContainer.value.appendChild(renderer.domElement);
+  canvasContainer.value.appendChild(renderer.domElement)
 
   /* --------------------------------------------------------------
    * 创建 Raycaster + Vector2（只创建一次，每帧复用同一个实例性能好）
@@ -181,15 +183,15 @@ const initScene = () => {
    *     direction : 射线方向(Vector3，必须归一化)，同上会自动算
    *     near/far  : 射线的有效距离区间
    * -------------------------------------------------------------- */
-  raycaster = new THREE.Raycaster();
+  raycaster = new THREE.Raycaster()
   // 可选: 限制只在 0.1 ~ 200 单位内命中
   // raycaster.near = 0.1;
   // raycaster.far  = 200;
 
-  mouseNDC = new THREE.Vector2();   // 存 NDC 坐标(x,y ∈ [-1, 1])
+  mouseNDC = new THREE.Vector2() // 存 NDC 坐标(x,y ∈ [-1, 1])
 
   /* 绑定 canvas 点击事件 — 这就是你问的"点击事件怎么弄" */
-  renderer.domElement.addEventListener('click', onCanvasClick);
+  renderer.domElement.addEventListener('click', onCanvasClick)
   // 可选: 鼠标移动时高亮（hover），先不加，要加的话放开下一行
   // renderer.domElement.addEventListener('pointermove', onCanvasPointerMove);
 
@@ -211,11 +213,11 @@ const initScene = () => {
    *      dispose()   卸载事件监听
    * ====================================================================== */
   controls = new OrbitControls(
-    camera,                // ← 参数1: 要控制的相机
-    renderer.domElement    // ← 参数2: 接收事件的 DOM
-  );
-  controls.enableDamping = true;     // 开启拖拽惯性
-  controls.dampingFactor = 0.05;     // 阻尼系数，越小滑行越久
+    camera, // ← 参数1: 要控制的相机
+    renderer.domElement, // ← 参数2: 接收事件的 DOM
+  )
+  controls.enableDamping = true // 开启拖拽惯性
+  controls.dampingFactor = 0.05 // 阻尼系数，越小滑行越久
   // controls.autoRotate = true;      // 可选: 自动旋转
   // controls.autoRotateSpeed = 1;    // 可选: 自动旋转速度
   // controls.minDistance = 5;        // 可选: 缩放最近距离
@@ -237,18 +239,20 @@ const initScene = () => {
    *        .castShadow = true     : 开启投影（还需配 shadow.camera + renderer.shadowMap.enabled）
    * ====================================================================== */
   const ambientLight = new THREE.AmbientLight(
-    0x404040,   // ← 参数1: 光的颜色(深灰)
-    2           // ← 参数2: 强度 2，放大整体底光
-  );
-  scene.add(ambientLight);
+    0x404040, // ← 参数1: 光的颜色(深灰)
+    2, // ← 参数2: 强度 2，放大整体底光
+  )
+
+  scene.add(ambientLight)
 
   const directionalLight = new THREE.DirectionalLight(
-    0xffffff,   // ← 参数1: 白光
-    1           // ← 参数2: 强度 1
-  );
-  directionalLight.position.set(5, 5, 5);   // ← 光源位置(决定方向)
+    0xffffff, // ← 参数1: 白光
+    1, // ← 参数2: 强度 1
+  )
+
+  directionalLight.position.set(5, 5, 5) // ← 光源位置(决定方向)
   // directionalLight.castShadow = true;     // ← 可选: 开启阴影投射
-  scene.add(directionalLight);
+  scene.add(directionalLight)
 
   /* ======================================================================
    * 6) AxesHelper — 坐标轴辅助线(调试用)
@@ -257,9 +261,10 @@ const initScene = () => {
    *    红=X 轴, 绿=Y 轴, 蓝=Z 轴
    * ====================================================================== */
   const axesHelper = new THREE.AxesHelper(
-    5   // ← 参数1: 轴长度 5 个单位
-  );
-  scene.add(axesHelper);
+    5, // ← 参数1: 轴长度 5 个单位
+  )
+
+  scene.add(axesHelper)
 
   /* ======================================================================
    * 7) 地面 Mesh ( Mesh = Geometry(形状) + Material(材质) )
@@ -287,57 +292,58 @@ const initScene = () => {
    *        .castShadow / .receiveShadow    : 是否投/收阴影
    * ====================================================================== */
   const groundGeometry = new THREE.PlaneGeometry(
-    20,   // ← 参数1: 宽度 20
-    20    // ← 参数2: 高度 20
+    20, // ← 参数1: 宽度 20
+    20, // ← 参数2: 高度 20
     // , 4  // ← 参数3(可选): widthSeg 宽度分段
     // , 4  // ← 参数4(可选): heightSeg 高度分段
-  );
+  )
   const groundMaterial = new THREE.MeshStandardMaterial({
-    color: 0xcccccc,                    // ← 基础颜色
-    roughness: 0.5,                     // ← 粗糙度(0~1)
-    metalness: 0,                       // ← 金属度(0~1)，地面一般非金属
-    side: THREE.DoubleSide,             // ← 双面渲染(防止从下面看地面消失)
+    color: 0xcccccc, // ← 基础颜色
+    roughness: 0.5, // ← 粗糙度(0~1)
+    metalness: 0, // ← 金属度(0~1)，地面一般非金属
+    side: THREE.DoubleSide, // ← 双面渲染(防止从下面看地面消失)
     // transparent: true, opacity: 0.8, // ← 可选: 开启透明度
     // wireframe: true,                 // ← 可选: 线框模式
-  });
+  })
   const ground = new THREE.Mesh(
-    groundGeometry,   // ← 参数1: 几何体(形状)
-    groundMaterial    // ← 参数2: 材质(皮肤)
-  );
+    groundGeometry, // ← 参数1: 几何体(形状)
+    groundMaterial, // ← 参数2: 材质(皮肤)
+  )
+
   // Plane 默认在 XY 平面，我们要放到地面(XZ 平面)，所以绕 X 轴旋转 -90°
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -5;          // 下沉 5 个单位，给立方体留下掉落空间
+  ground.rotation.x = -Math.PI / 2
+  ground.position.y = -5 // 下沉 5 个单位，给立方体留下掉落空间
   // ground.receiveShadow = true;   // ← 可选: 接收阴影
-  scene.add(ground);
+  scene.add(ground)
 
   /* ======================================================================
    * 8) 启动渲染循环 & 窗口监听
    *    animate()  内部递归 requestAnimationFrame 绘制
    * ====================================================================== */
-  animate();
-  window.addEventListener('resize', handleResize);
-};
+  animate()
+  window.addEventListener('resize', handleResize)
+}
 
 /**
  * animate — 渲染循环
  * 每帧做 3 件事：更新控制器 → 更新物体动画 → 调用 renderer.render 画一帧
  */
 const animate = () => {
-  animationId = requestAnimationFrame(animate);
+  animationId = requestAnimationFrame(animate)
 
-  controls.update();  // 控制器每帧必须调一次，阻尼/自动旋转才生效
+  controls.update() // 控制器每帧必须调一次，阻尼/自动旋转才生效
 
   // 逐个立方体更新旋转
   if (isRotating.value) {
     cubes.forEach((cube, index) => {
-      cube.rotation.x += rotationSpeed.value;
-      cube.rotation.y += rotationSpeed.value * (1 + index * 0.1);
-    });
+      cube.rotation.x += rotationSpeed.value
+      cube.rotation.y += rotationSpeed.value * (1 + index * 0.1)
+    })
   }
 
   // 参数1: 场景对象  参数2: 相机对象
-  renderer.render(scene, camera);
-};
+  renderer.render(scene, camera)
+}
 
 /**
  * addCube — 生成一个随机颜色/位置/大小的立方体并加入场景
@@ -350,10 +356,10 @@ const addCube = () => {
    *   wSeg/hSeg/dSeg         : 各方向分段(需要变形时才加大)
    * --------------------------------------------------------------- */
   const geometry = new THREE.BoxGeometry(
-    1,  // ← 宽
-    1,  // ← 高
-    1   // ← 深
-  );
+    1, // ← 宽
+    1, // ← 高
+    1, // ← 深
+  )
 
   /* MeshStandardMaterial 参数(同地面材质)
    *   color     : 颜色
@@ -364,60 +370,62 @@ const addCube = () => {
   const material = new THREE.MeshStandardMaterial({
     // Math.random() 作为 r,g,b → 拼一个随机颜色
     color: new THREE.Color(Math.random(), Math.random(), Math.random()),
-    metalness: 0.5,   // ← 半金属质感
-    roughness: 0.3,   // ← 有点光滑
+    metalness: 0.5, // ← 半金属质感
+    roughness: 0.3, // ← 有点光滑
     // wireframe: true,
-  });
+  })
 
   // Mesh(geometry, material)  — 见上面地面处的详细注释
-  const cube = new THREE.Mesh(geometry, material);
+  const cube = new THREE.Mesh(geometry, material)
 
   // 随机位置(根据 sceneSize 在范围内均匀分布)
-  const positionRange = sceneSize.value / 2 - 1;
-  cube.position.x = (Math.random() - 0.5) * positionRange * 2;
-  cube.position.y = Math.random() * 5;
-  cube.position.z = (Math.random() - 0.5) * positionRange * 2;
+  const positionRange = sceneSize.value / 2 - 1
+
+  cube.position.x = (Math.random() - 0.5) * positionRange * 2
+  cube.position.y = Math.random() * 5
+  cube.position.z = (Math.random() - 0.5) * positionRange * 2
 
   // 随机初始旋转角度
-  cube.rotation.x = Math.random() * Math.PI;
-  cube.rotation.y = Math.random() * Math.PI;
+  cube.rotation.x = Math.random() * Math.PI
+  cube.rotation.y = Math.random() * Math.PI
 
   // 随机缩放 0.5 ~ 2 倍
-  const scale = 0.5 + Math.random() * 1.5;
-  cube.scale.set(scale, scale, scale);
+  const scale = 0.5 + Math.random() * 1.5
 
-  scene.add(cube);
-  cubes.push(cube);
-  cubeCount.value = cubes.length;
-};
+  cube.scale.set(scale, scale, scale)
+
+  scene.add(cube)
+  cubes.push(cube)
+  cubeCount.value = cubes.length
+}
 
 /**
  * resetScene — 清空所有立方体，重置相机和控制器
  */
 const resetScene = () => {
   // 释放每个立方体的 geometry 和 material（不 dispose 会显存泄漏）
-  cubes.forEach(cube => {
-    scene.remove(cube);
-    cube.geometry.dispose();
-    cube.material.dispose();
-  });
+  cubes.forEach((cube) => {
+    scene.remove(cube)
+    cube.geometry.dispose()
+    cube.material.dispose()
+  })
 
-  cubes = [];
-  cubeCount.value = 0;
+  cubes = []
+  cubeCount.value = 0
 
   // position.set(x,y,z) : 同时设置三维坐标
-  camera.position.set(0, 5, 15);
+  camera.position.set(0, 5, 15)
   // lookAt(x,y,z)       : 强制相机看向某个点
-  camera.lookAt(0, 0, 0);
-  controls.reset();
-};
+  camera.lookAt(0, 0, 0)
+  controls.reset()
+}
 
 /**
  * toggleRotation — 切换是否自动旋转立方体
  */
 const toggleRotation = () => {
-  isRotating.value = !isRotating.value;
-};
+  isRotating.value = !isRotating.value
+}
 
 /* ==========================================================================
  * 🔍 点击拾取（你问的"点击事件"核心逻辑）
@@ -454,100 +462,103 @@ const toggleRotation = () => {
  */
 const onCanvasClick = (event) => {
   // 只响应左键（避免右键菜单也触发拾取）
-  if (event.button !== 0) return;
+  if (event.button !== 0) return
 
-  const canvas = renderer.domElement;
-  const rect = canvas.getBoundingClientRect();
+  const canvas = renderer.domElement
+  const rect = canvas.getBoundingClientRect()
 
   // → 步骤 2: 像素内坐标
-  const pixelX = event.clientX - rect.left;
-  const pixelY = event.clientY - rect.top;
+  const pixelX = event.clientX - rect.left
+  const pixelY = event.clientY - rect.top
 
   // → 步骤 3: 归一化到 [-1, 1]
-  mouseNDC.x = (pixelX / rect.width) * 2 - 1;
-  mouseNDC.y = -(pixelY / rect.height) * 2 + 1;
+  mouseNDC.x = (pixelX / rect.width) * 2 - 1
+  mouseNDC.y = -(pixelY / rect.height) * 2 + 1
 
   // → 步骤 4: 生成射线
-  raycaster.setFromCamera(mouseNDC, camera);
+  raycaster.setFromCamera(mouseNDC, camera)
 
   // → 步骤 5: 与 cubes 数组里的所有 mesh 求交
   //    recursive: false，因为 cubes 存的就是 Mesh；里面若有 Group/子对象 才要 true
-  const intersects = raycaster.intersectObjects(cubes, false);
+  const intersects = raycaster.intersectObjects(cubes, false)
 
   if (intersects.length === 0) {
     // 没命中任何物体
-    clearHighlight();
-    lastHit.value = null;
-    return;
+    clearHighlight()
+    lastHit.value = null
+
+    return
   }
 
   // 取最近一个命中
-  const hit = intersects[0];
-  const cube = hit.object;
-  const index = cubes.indexOf(cube);
+  const hit = intersects[0]
+  const cube = hit.object
+  const index = cubes.indexOf(cube)
 
   // UI 上显示
   lastHit.value = {
-    index,                           // cubes 数组里的下标
+    index, // cubes 数组里的下标
     position: cube.position.clone(), // 世界位置（克隆防止被动画改动）
-    colorHex: '#' + cube.material.color.getHexString(),  // 颜色 #RRGGBB
-    distance: hit.distance,          // 射线距离
-    hitPoint: hit.point.clone(),     // 面上精确命中点
+    colorHex: `#${cube.material.color.getHexString()}`, // 颜色 #RRGGBB
+    distance: hit.distance, // 射线距离
+    hitPoint: hit.point.clone(), // 面上精确命中点
     normal: hit.face.normal.clone(), // 命中面法线
-  };
+  }
 
   // 高亮命中立方体(改为黄色)
-  setHighlight(cube);
+  setHighlight(cube)
 
-  console.log('[ThreeJsDemo] 命中立方体：', lastHit.value);
-};
+  console.log('[ThreeJsDemo] 命中立方体：', lastHit.value)
+}
 
 /**
  * 给某个 cube 设置高亮颜色
  */
 const setHighlight = (cube) => {
   // 先恢复上一个高亮，避免多个立方体同时黄
-  clearHighlight();
-  if (!cube) return;
-  highlightedCube = cube;
+  clearHighlight()
+  if (!cube) return
+  highlightedCube = cube
   // 用 .clone() 存备份：Material.color 是同一个 Color 对象引用
-  highlightBakColor = cube.material.color.clone();
+  highlightBakColor = cube.material.color.clone()
   // 改成高亮色（黄色 + 自发光稍微一点，阴影里也能看出来）
-  cube.material.color.set('#ffdd33');
-  cube.material.emissive?.set('#ff9900');
-  cube.material.emissiveIntensity = 0.35;
-};
+  cube.material.color.set('#ffdd33')
+  cube.material.emissive?.set('#ff9900')
+  cube.material.emissiveIntensity = 0.35
+}
 
 /**
  * 清除高亮，恢复原来的颜色
  */
 const clearHighlight = () => {
   if (highlightedCube && highlightBakColor) {
-    highlightedCube.material.color.copy(highlightBakColor);
-    highlightedCube.material.emissive?.set('#000000');
-    highlightedCube.material.emissiveIntensity = 0;
+    highlightedCube.material.color.copy(highlightBakColor)
+    highlightedCube.material.emissive?.set('#000000')
+    highlightedCube.material.emissiveIntensity = 0
   }
-  highlightedCube = null;
-  highlightBakColor = null;
-};
+  highlightedCube = null
+  highlightBakColor = null
+}
 
 /**
  * 移除当前被点击选中的那个立方体（命中面板里的按钮调用）
  */
 const removeHitCube = () => {
-  if (!lastHit.value) return;
-  const idx = lastHit.value.index;
-  if (idx < 0 || idx >= cubes.length) return;
-  const cube = cubes[idx];
-  scene.remove(cube);
-  cube.geometry.dispose();
-  cube.material.dispose();
-  cubes.splice(idx, 1);
-  cubeCount.value = cubes.length;
+  if (!lastHit.value) return
+  const idx = lastHit.value.index
+
+  if (idx < 0 || idx >= cubes.length) return
+  const cube = cubes[idx]
+
+  scene.remove(cube)
+  cube.geometry.dispose()
+  cube.material.dispose()
+  cubes.splice(idx, 1)
+  cubeCount.value = cubes.length
   // 删掉后清空选中状态
-  clearHighlight();
-  lastHit.value = null;
-};
+  clearHighlight()
+  lastHit.value = null
+}
 
 /* ==========================================================================
  * (可选参考) 鼠标悬停高亮 — 逻辑与 click 一样，只是 pointermove + 节流
@@ -573,54 +584,54 @@ const removeHitCube = () => {
  * 注意顺序：先改 camera.aspect，再 updateProjectionMatrix，最后 renderer.setSize
  */
 const handleResize = () => {
-  if (!canvasContainer.value) return;
+  if (!canvasContainer.value) return
 
-  const width = canvasContainer.value.clientWidth;
-  const height = canvasContainer.value.clientHeight;
+  const width = canvasContainer.value.clientWidth
+  const height = canvasContainer.value.clientHeight
 
   // aspect 宽高比 — 直接用 CSS 宽高比赋值
-  camera.aspect = width / height;
+  camera.aspect = width / height
   // 更新相机投影矩阵（aspect/fov/near/far 任一项改变都必须调这句才生效）
-  camera.updateProjectionMatrix();
+  camera.updateProjectionMatrix()
 
   // 同步渲染器 canvas 尺寸
-  renderer.setSize(width, height);
-};
+  renderer.setSize(width, height)
+}
 
 // 生命周期钩子
 onMounted(() => {
-  initScene();
-  
+  initScene()
+
   // 初始添加3个立方体
   for (let i = 0; i < 3; i++) {
-    setTimeout(addCube, i * 500);
+    setTimeout(addCube, i * 500)
   }
-});
+})
 
 onUnmounted(() => {
   // 清理资源
   if (animationId) {
-    cancelAnimationFrame(animationId);
+    cancelAnimationFrame(animationId)
   }
 
-  window.removeEventListener('resize', handleResize);
+  window.removeEventListener('resize', handleResize)
 
   // ⚠️ 解绑 canvas 点击事件，防止组件卸载后依然触发 + 内存泄漏
   if (renderer?.domElement) {
-    renderer.domElement.removeEventListener('click', onCanvasClick);
+    renderer.domElement.removeEventListener('click', onCanvasClick)
     // renderer.domElement.removeEventListener('pointermove', onCanvasPointerMove);
   }
 
   if (renderer) {
-    renderer.dispose();
+    renderer.dispose()
   }
 
   if (controls) {
-    controls.dispose();
+    controls.dispose()
   }
 
-  resetScene();
-});
+  resetScene()
+})
 </script>
 
 <style scoped>
@@ -650,6 +661,7 @@ onUnmounted(() => {
   overflow: hidden;
   cursor: grab;
 }
+
 .canvas-container:active {
   cursor: grabbing;
 }
@@ -661,26 +673,29 @@ onUnmounted(() => {
   right: 12px;
   width: 230px;
   padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgb(255 255 255 / 95%);
   border: 1px solid #ebeef5;
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
   font-size: 13px;
   color: #303133;
   z-index: 10;
   user-select: none;
 }
+
 .hit-title {
   font-weight: 700;
   margin-bottom: 8px;
   color: #409eff;
 }
+
 .hit-row {
   display: flex;
   align-items: center;
   gap: 6px;
   line-height: 1.8;
 }
+
 .hit-row code {
   font-family: Consolas, Menlo, monospace;
   font-size: 12px;
@@ -689,6 +704,7 @@ onUnmounted(() => {
   border-radius: 3px;
   color: #606266;
 }
+
 .color-box {
   display: inline-block;
   width: 18px;

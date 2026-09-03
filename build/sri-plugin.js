@@ -1,3 +1,4 @@
+/* global Buffer -- Node.js 构建脚本，用 Buffer 处理二进制 */
 /**
  * sri-plugin.js — SRI 防篡改自定义 vite 插件
  *
@@ -26,12 +27,15 @@ import crypto from 'node:crypto'
 const computeIntegrity = async (url) => {
   try {
     const res = await fetch(url, { redirect: 'follow' })
+
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const buf = Buffer.from(await res.arrayBuffer())
     const hash = crypto.createHash('sha512').update(buf).digest('base64')
+
     return `sha512-${hash}`
   } catch (err) {
     console.warn(`[SRI] 获取 ${url} 失败: ${err.message}，仅注入 crossorigin`)
+
     return null
   }
 }
@@ -59,6 +63,7 @@ export const addSriToCdnAssets = (cdnUrls) => {
         const scriptRe = /<script\b([^>]*)\bsrc="([^"]+)"([^>]*)><\/script>/g
         const linkRe = /<link\b([^>]*)\bhref="([^"]+)"([^>]*)>/g
         let m
+
         while ((m = scriptRe.exec(html)) !== null) {
           if (urls.includes(m[2])) found.add(m[2])
         }
@@ -68,7 +73,7 @@ export const addSriToCdnAssets = (cdnUrls) => {
 
         // 并行获取所有 hash
         const hashEntries = await Promise.all(
-          [...found].map(async (u) => [u, await computeIntegrity(u)])
+          [...found].map(async (u) => [u, await computeIntegrity(u)]),
         )
         const hashMap = new Map(hashEntries)
 
@@ -80,6 +85,7 @@ export const addSriToCdnAssets = (cdnUrls) => {
           const newPre = stripOldAttrs(pre)
           const newPost = stripOldAttrs(post)
           const sriAttr = integrity ? ` integrity="${integrity}"` : ''
+
           return `<script${newPre} src="${src}"${newPost}${sriAttr} crossorigin="anonymous" referrerpolicy="no-referrer"></script>`
         })
 
@@ -90,6 +96,7 @@ export const addSriToCdnAssets = (cdnUrls) => {
           const newPre = stripOldAttrs(pre)
           const newPost = stripOldAttrs(post)
           const sriAttr = integrity ? ` integrity="${integrity}"` : ''
+
           return `<link${newPre} href="${href}"${newPost}${sriAttr} crossorigin="anonymous" referrerpolicy="no-referrer">`
         })
 

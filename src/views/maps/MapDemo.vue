@@ -4,7 +4,7 @@
       <h2>OpenLayers 地图示例</h2>
       <p>这个示例展示了如何在Vue 3项目中集成和使用OpenLayers地图</p>
     </div>
-    
+
     <div class="demo-content">
       <el-card>
         <template #header>
@@ -20,7 +20,7 @@
         </template>
         <OLMap ref="mapComponent" />
       </el-card>
-      
+
       <el-card class="info-card">
         <template #header>
           <span>地图说明</span>
@@ -46,52 +46,55 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted } from 'vue';
-import OLMap from '@/components/OLMap.vue';
+import { ref, onUnmounted } from 'vue'
 
-const mapComponent = ref(null);
+import OLMap from '@/components/OLMap.vue'
+
+const mapComponent = ref(null)
 
 // 定位到北京
 const centerToBeijing = () => {
   if (mapComponent.value && typeof mapComponent.value.setCenter === 'function') {
-    mapComponent.value.setCenter(116.397228, 39.9075);
+    mapComponent.value.setCenter(116.397228, 39.9075)
   }
-};
+}
 
 // 定位到上海
 const centerToShanghai = () => {
   if (mapComponent.value && typeof mapComponent.value.setCenter === 'function') {
-    mapComponent.value.setCenter(121.473701, 31.230416);
+    mapComponent.value.setCenter(121.473701, 31.230416)
   }
-};
+}
 
 // 放大地图
 const zoomIn = () => {
   if (mapComponent.value && typeof mapComponent.value.setZoom === 'function') {
     // 先获取当前缩放级别，然后增加1
-    const currentZoom = mapComponent.value.mapInstance?.getView()?.getZoom() || 10;
-    mapComponent.value.setZoom(currentZoom + 1);
+    const currentZoom = mapComponent.value.mapInstance?.getView()?.getZoom() || 10
+
+    mapComponent.value.setZoom(currentZoom + 1)
   }
-};
+}
 
 // 缩小地图
 const zoomOut = () => {
   if (mapComponent.value && typeof mapComponent.value.setZoom === 'function') {
     // 先获取当前缩放级别，然后减少1
-    const currentZoom = mapComponent.value.mapInstance?.getView()?.getZoom() || 10;
-    mapComponent.value.setZoom(currentZoom - 1);
+    const currentZoom = mapComponent.value.mapInstance?.getView()?.getZoom() || 10
+
+    mapComponent.value.setZoom(currentZoom - 1)
   }
-};
+}
 
 // 组件卸载时清理地图资源
 onUnmounted(() => {
   if (mapComponent.value) {
     // 安全地调用cleanup方法
     if (typeof mapComponent.value.cleanup === 'function') {
-      mapComponent.value.cleanup();
+      mapComponent.value.cleanup()
     }
   }
-});
+})
 </script>
 
 <style scoped>
@@ -107,7 +110,7 @@ onUnmounted(() => {
 }
 
 .demo-header h2 {
-  margin: 0 0 10px 0;
+  margin: 0 0 10px;
   color: #303133;
 }
 
@@ -147,13 +150,13 @@ onUnmounted(() => {
 }
 
 .map-info h3 {
-  margin: 0 0 15px 0;
+  margin: 0 0 15px;
   font-size: 16px;
   color: #303133;
 }
 
 .map-info ul {
-  margin: 0 0 20px 0;
+  margin: 0 0 20px;
   padding-left: 20px;
 }
 

@@ -1,17 +1,12 @@
 <template>
   <div class="image-container">
     <div class="image-wrapper">
-      <img 
-        src="./QQ20260106-171844.png" 
-        alt="展示图片" 
-        class="display-image"
-      />
+      <img src="./QQ20260106-171844.png" alt="展示图片" class="display-image" />
     </div>
   </div>
 </template>
 
-<script setup>
-</script>
+<script setup></script>
 
 <style scoped lang="scss">
 .image-container {

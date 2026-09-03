@@ -4,7 +4,7 @@
       <h2>3D饼图示例</h2>
       <p>这个示例展示了如何使用ECharts创建具有3D效果的饼图</p>
     </div>
-    
+
     <div class="demo-content">
       <el-card>
         <template #header>
@@ -13,17 +13,17 @@
             <el-button type="primary" size="small" @click="refreshChart">刷新数据</el-button>
           </div>
         </template>
-        <three-d-pie-chart 
-          ref="chartComponent" 
-          :data="chartData" 
-          :auto-rotate="autoRotate" 
+        <three-d-pie-chart
+          ref="chartComponent"
+          :data="chartData"
+          :auto-rotate="autoRotate"
           :rotate-speed="rotateSpeed"
           @chart-click="handleChartClick"
           @chart-hover="handleChartHover"
           @chart-ready="handleChartReady"
         />
       </el-card>
-      
+
       <el-card class="options-card">
         <template #header>
           <span>图表控制与信息</span>
@@ -31,25 +31,42 @@
         <div class="chart-controls">
           <!-- 图表控制选项 -->
           <div class="control-group">
-            <el-switch v-model="autoRotate" active-text="开启" inactive-text="关闭" @change="handleAutoRotateChange">
+            <el-switch
+              v-model="autoRotate"
+              active-text="开启"
+              inactive-text="关闭"
+              @change="handleAutoRotateChange"
+            >
               <template #default>
                 <span>自动旋转</span>
               </template>
             </el-switch>
             <div v-if="autoRotate" class="speed-control">
               <span>旋转速度：{{ rotateSpeed }}</span>
-              <el-slider v-model="rotateSpeed" :min="1" :max="50" :step="1" style="width: 200px;"></el-slider>
+              <el-slider
+                v-model="rotateSpeed"
+                :min="1"
+                :max="50"
+                :step="1"
+                style="width: 200px"
+              ></el-slider>
             </div>
           </div>
-          
+
           <!-- 选中的数据信息 -->
           <div v-if="selectedData" class="selected-data-info">
             <el-alert title="当前选中" type="success" :closable="false">
-              <p><strong>名称：</strong>{{ selectedData.name }}</p>
-              <p><strong>数值：</strong>{{ selectedData.value }}</p>
+              <p>
+                <strong>名称：</strong>
+                {{ selectedData.name }}
+              </p>
+              <p>
+                <strong>数值：</strong>
+                {{ selectedData.value }}
+              </p>
             </el-alert>
           </div>
-          
+
           <!-- 图表说明 -->
           <div class="chart-info">
             <h3>3D饼图实现说明</h3>
@@ -75,6 +92,7 @@
 
 <script setup>
 import { ref, onUnmounted, reactive } from 'vue'
+
 import ThreeDPieChart from '@/components/ThreeDPieChart.vue'
 
 const chartComponent = ref(null)
@@ -92,20 +110,21 @@ const generateRandomData = () => {
   const data = []
   const count = Math.floor(Math.random() * 3) + 5 // 生成5-7个数据项
   let totalValue = 0
-  
+
   // 先随机生成每个部分的值，总和不超过200
   for (let i = 0; i < count; i++) {
     const value = Math.floor(Math.random() * 50) + 10 // 每个部分的值在10-60之间
+
     data.push({
       name: labels[i % labels.length],
-      value: value,
+      value,
       itemStyle: {
-        color: colors[i % colors.length]
-      }
+        color: colors[i % colors.length],
+      },
     })
     totalValue += value
   }
-  
+
   return data
 }
 
@@ -117,10 +136,10 @@ const initChartData = () => {
 // 刷新图表数据
 const refreshChart = () => {
   console.log('刷新图表数据')
-  
+
   // 生成新的随机数据
   const newData = generateRandomData()
-  
+
   // 更新图表数据
   if (chartComponent.value && typeof chartComponent.value.updateChart === 'function') {
     chartComponent.value.updateChart(newData, 0.59)
@@ -183,7 +202,7 @@ onUnmounted(() => {
 }
 
 .demo-header h2 {
-  margin: 0 0 10px 0;
+  margin: 0 0 10px;
   color: #303133;
 }
 
@@ -244,13 +263,13 @@ onUnmounted(() => {
 }
 
 .chart-info h3 {
-  margin: 0 0 15px 0;
+  margin: 0 0 15px;
   font-size: 16px;
   color: #303133;
 }
 
 .chart-info ul {
-  margin: 0 0 20px 0;
+  margin: 0 0 20px;
   padding-left: 20px;
 }
 

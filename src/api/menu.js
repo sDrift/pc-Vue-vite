@@ -189,6 +189,7 @@ const DYNAMIC_ROUTES = [
  */
 export async function getDynamicRoutes() {
   await delay(300)
+
   return DYNAMIC_ROUTES
 }
 

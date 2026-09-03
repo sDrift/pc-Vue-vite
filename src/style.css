@@ -28,12 +28,12 @@
   --transition-time: 0.3s;
   
   /* 阴影变量 */
-  --box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  --box-shadow-light: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+  --box-shadow-light: 0 1px 4px rgb(0 0 0 / 8%);
   
   /* 其他全局变量 */
   font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  text-rendering: optimizelegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -117,8 +117,8 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 500;
   line-height: 1.2;
 }
-button:focus,
-button:focus-visible {
+
+button:focus, button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
@@ -126,21 +126,16 @@ button:focus-visible {
   padding: 2em;
 }
 
-#app {
-  /* max-width: 1280px; */
-  margin: 0 auto;
-  /* padding: 2rem; */
-  text-align: center;
-}
-
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    background-color: #ffffff;
+    background-color: #fff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
   }

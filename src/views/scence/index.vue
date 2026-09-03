@@ -9,7 +9,8 @@
       <div class="header-right">
         <span class="time">{{ currentTime }}</span>
         <el-button type="primary" size="small" @click="refreshData">
-          <Refresh /> 刷新数据
+          <Refresh />
+          刷新数据
         </el-button>
       </div>
     </header>
@@ -92,15 +93,17 @@
             <span>风险监控</span>
           </div>
           <div class="monitor-tabs">
-            <el-tabs
-              v-model="activeMonitorTab"
-              type="card"
-              @tab-change="handleMonitorTabChange"
-            >
+            <el-tabs v-model="activeMonitorTab" type="card" @tab-change="handleMonitorTabChange">
               <el-tab-pane label="工程进度" name="progress">
                 <div class="progress-stats">
-                  <span>工程进度 <strong>39个</strong></span>
-                  <span>工程隐患 <strong>1501个</strong></span>
+                  <span>
+                    工程进度
+                    <strong>39个</strong>
+                  </span>
+                  <span>
+                    工程隐患
+                    <strong>1501个</strong>
+                  </span>
                 </div>
                 <el-table :data="projectList" border :height="180">
                   <el-table-column prop="name" label="名称" />
@@ -110,8 +113,14 @@
               </el-tab-pane>
               <el-tab-pane label="隐患整改" name="hidden">
                 <div class="hidden-stats">
-                  <span>已完工 <strong>3个</strong></span>
-                  <span>整治中 <strong>3个</strong></span>
+                  <span>
+                    已完工
+                    <strong>3个</strong>
+                  </span>
+                  <span>
+                    整治中
+                    <strong>3个</strong>
+                  </span>
                 </div>
                 <el-table :data="hiddenList" border :height="180">
                   <el-table-column prop="name" label="名称" />
@@ -266,13 +275,7 @@
           <div ref="mapRef" class="map-content">
             <svg viewBox="0 0 600 400" class="map-svg">
               <defs>
-                <linearGradient
-                  id="areaGradient"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="100%"
-                >
+                <linearGradient id="areaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#1a4d3a" />
                   <stop offset="100%" stop-color="#0d2d1f" />
                 </linearGradient>
@@ -294,9 +297,7 @@
                 stroke-width="1.5"
                 class="map-area"
               />
-              <text x="420" y="235" fill="#a8e6cf" font-size="12">
-                两江新区
-              </text>
+              <text x="420" y="235" fill="#a8e6cf" font-size="12">两江新区</text>
 
               <path
                 d="M280,150 Q320,130 350,160 L370,190 Q350,210 320,190 L290,170 Q270,150 280,150 Z"
@@ -305,9 +306,7 @@
                 stroke-width="1.5"
                 class="map-area"
               />
-              <text x="315" y="175" fill="#a8e6cf" font-size="11">
-                沙坪坝区
-              </text>
+              <text x="315" y="175" fill="#a8e6cf" font-size="11">沙坪坝区</text>
 
               <path
                 d="M320,200 Q350,180 380,210 L400,240 Q370,260 340,240 L310,220 Q290,200 320,200 Z"
@@ -325,9 +324,7 @@
                 stroke-width="1.5"
                 class="map-area"
               />
-              <text x="375" y="285" fill="#a8e6cf" font-size="11">
-                九龙坡区
-              </text>
+              <text x="375" y="285" fill="#a8e6cf" font-size="11">九龙坡区</text>
 
               <path
                 d="M400,280 Q430,260 460,290 L480,320 Q450,340 420,320 L390,300 Q370,280 400,280 Z"
@@ -354,9 +351,7 @@
                 stroke-width="1.5"
                 class="map-area"
               />
-              <text x="285" y="245" fill="#a8e6cf" font-size="11">
-                大渡口区
-              </text>
+              <text x="285" y="245" fill="#a8e6cf" font-size="11">大渡口区</text>
 
               <path
                 d="M220,180 Q250,160 280,190 L300,220 Q270,240 240,220 L210,200 Q190,180 220,180 Z"
@@ -413,7 +408,8 @@
           </div>
           <div class="layer-control">
             <el-button type="text" @click="toggleLayer">
-              <Files /> 图层管理
+              <Files />
+              图层管理
             </el-button>
           </div>
         </div>
@@ -422,21 +418,26 @@
         <div class="bottom-controls">
           <div class="left-controls">
             <el-button type="primary" @click="exportData">
-              <Download /> 组件中心
+              <Download />
+              组件中心
             </el-button>
             <el-button type="primary" @click="reportCenter">
-              <Document /> 事件中心
+              <Document />
+              事件中心
             </el-button>
           </div>
           <div class="right-controls">
             <el-button type="success" @click="smartAssist">
-              <Cpu /> 智能助手
+              <Cpu />
+              智能助手
             </el-button>
             <el-button type="success" @click="smartAnalysis">
-              <DataLine /> 智能分析
+              <DataLine />
+              智能分析
             </el-button>
             <el-button type="primary" @click="exportReport">
-              <Printer /> 导出报告
+              <Printer />
+              导出报告
             </el-button>
           </div>
         </div>
@@ -471,11 +472,7 @@
             </div>
           </div>
           <div class="region-tabs">
-            <el-tabs
-              v-model="activeRegionTab"
-              type="card"
-              :tab-position="'left'"
-            >
+            <el-tabs v-model="activeRegionTab" type="card" :tab-position="'left'">
               <el-tab-pane label="区域(10)" name="region1">
                 <div class="region-content">
                   <div class="region-item">
@@ -660,115 +657,117 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted } from 'vue'
 // Element Plus 图标已在 main.js 全局注册（PascalCase），模板直接用 <Bell /> 即可
 
 // 当前时间
-const currentTime = ref("");
+const currentTime = ref('')
 
 // 标签页状态
-const activeMonitorTab = ref("progress");
-const activeDailyTab = ref("today");
-const activeRegionTab = ref("region1");
-const activePumpTab = ref("level1");
-const warningLevel = ref("normal");
+const activeMonitorTab = ref('progress')
+const activeDailyTab = ref('today')
+const activeRegionTab = ref('region1')
+const activePumpTab = ref('level1')
+const warningLevel = ref('normal')
 
 // 数据列表
 const projectList = ref([
   {
-    name: "巴南区花溪河沿线排水管网整治工程(一期)",
-    region: "巴南区",
-    person: "王五",
+    name: '巴南区花溪河沿线排水管网整治工程(一期)',
+    region: '巴南区',
+    person: '王五',
   },
   {
-    name: "南岸区茶园大道管网二期雨污分流改造",
-    region: "南岸区",
-    person: "赵六",
+    name: '南岸区茶园大道管网二期雨污分流改造',
+    region: '南岸区',
+    person: '赵六',
   },
   {
-    name: "江北区五里店雨污分流管网改造工程",
-    region: "江北区",
-    person: "钱七",
+    name: '江北区五里店雨污分流管网改造工程',
+    region: '江北区',
+    person: '钱七',
   },
-  { name: "渝北区空港新城雨污分流管网改造", region: "渝北区", person: "孙八" },
-  { name: "北碚区同兴园区雨污分流改造工程", region: "北碚区", person: "周九" },
-]);
+  { name: '渝北区空港新城雨污分流管网改造', region: '渝北区', person: '孙八' },
+  { name: '北碚区同兴园区雨污分流改造工程', region: '北碚区', person: '周九' },
+])
 
 const hiddenList = ref([
-  { name: "沙坪坝区某路段积水隐患", region: "沙坪坝区", status: "整治中" },
-  { name: "九龙坡区某小区排水问题", region: "九龙坡区", status: "整治中" },
-  { name: "大渡口区某道路管网堵塞", region: "大渡口区", status: "已完工" },
-]);
+  { name: '沙坪坝区某路段积水隐患', region: '沙坪坝区', status: '整治中' },
+  { name: '九龙坡区某小区排水问题', region: '九龙坡区', status: '整治中' },
+  { name: '大渡口区某道路管网堵塞', region: '大渡口区', status: '已完工' },
+])
 
 const historyList = ref([
-  { name: "渝中区解放碑区域管网改造", region: "渝中区", time: "2024-06-15" },
-  { name: "南岸区南坪商圈排水整治", region: "南岸区", time: "2024-06-10" },
-  { name: "江北区观音桥管网修复", region: "江北区", time: "2024-06-05" },
-]);
+  { name: '渝中区解放碑区域管网改造', region: '渝中区', time: '2024-06-15' },
+  { name: '南岸区南坪商圈排水整治', region: '南岸区', time: '2024-06-10' },
+  { name: '江北区观音桥管网修复', region: '江北区', time: '2024-06-05' },
+])
 
 // 更新时间
 const updateTime = () => {
-  const now = new Date();
+  const now = new Date()
+
   currentTime.value = now
-    .toLocaleString("zh-CN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+    .toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
     })
-    .replace(/\//g, "-");
-};
+    .replace(/\//g, '-')
+}
 
 // 刷新数据
 const refreshData = () => {
-  updateTime();
-};
+  updateTime()
+}
 
 // 切换图层
 const toggleLayer = () => {
   // 图层管理逻辑
-};
+}
 
 // 导出数据
 const exportData = () => {
   // 导出数据逻辑
-};
+}
 
 // 事件中心
 const reportCenter = () => {
   // 事件中心逻辑
-};
+}
 
 // 智能助手
 const smartAssist = () => {
   // 智能助手逻辑
-};
+}
 
 // 智能分析
 const smartAnalysis = () => {
   // 智能分析逻辑
-};
+}
 
 // 导出报告
 const exportReport = () => {
   // 导出报告逻辑
-};
+}
 
 // 切换监控标签
 const handleMonitorTabChange = (tab) => {
-  activeMonitorTab.value = tab;
-};
+  activeMonitorTab.value = tab
+}
 
 // 挂载时初始化时间
 onMounted(() => {
-  updateTime();
-  const timer = setInterval(updateTime, 1000);
+  updateTime()
+  const timer = setInterval(updateTime, 1000)
+
   onUnmounted(() => {
-    clearInterval(timer);
-  });
-});
+    clearInterval(timer)
+  })
+})
 </script>
 
 <style scoped>
@@ -790,11 +789,11 @@ onMounted(() => {
   padding: 12px 30px;
   background: linear-gradient(
     90deg,
-    rgba(0, 64, 128, 0.6) 0%,
-    rgba(0, 80, 160, 0.4) 50%,
-    rgba(0, 64, 128, 0.6) 100%
+    rgb(0 64 128 / 60%) 0%,
+    rgb(0 80 160 / 40%) 50%,
+    rgb(0 64 128 / 60%) 100%
   );
-  border-bottom: 1px solid rgba(45, 180, 255, 0.3);
+  border-bottom: 1px solid rgb(45 180 255 / 30%);
 }
 
 .header-left {
@@ -806,7 +805,7 @@ onMounted(() => {
   font-size: 28px;
   font-weight: bold;
   color: #00d4ff;
-  text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+  text-shadow: 0 0 20px rgb(0 212 255 / 50%);
 }
 
 .subtitle {
@@ -824,7 +823,7 @@ onMounted(() => {
 .time {
   font-size: 16px;
   color: #a8e6cf;
-  font-family: "Courier New", monospace;
+  font-family: 'Courier New', monospace;
 }
 
 /* 主内容区 */
@@ -847,9 +846,9 @@ onMounted(() => {
 
 /* 面板区域 */
 .panel-section {
-  background: rgba(0, 40, 80, 0.5);
+  background: rgb(0 40 80 / 50%);
   border-radius: 8px;
-  border: 1px solid rgba(45, 180, 255, 0.2);
+  border: 1px solid rgb(45 180 255 / 20%);
   overflow: hidden;
 }
 
@@ -857,8 +856,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   padding: 10px 12px;
-  background: rgba(0, 64, 128, 0.5);
-  border-bottom: 1px solid rgba(45, 180, 255, 0.2);
+  background: rgb(0 64 128 / 50%);
+  border-bottom: 1px solid rgb(45 180 255 / 20%);
 }
 
 .section-icon {
@@ -882,7 +881,7 @@ onMounted(() => {
 }
 
 .risk-item {
-  background: rgba(0, 80, 120, 0.4);
+  background: rgb(0 80 120 / 40%);
   border-radius: 6px;
   padding: 12px;
   text-align: center;
@@ -910,7 +909,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(45, 180, 255, 0.1);
+  border-bottom: 1px solid rgb(45 180 255 / 10%);
 }
 
 .detail-item:last-child {
@@ -950,7 +949,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   padding: 10px;
-  border-bottom: 1px solid rgba(45, 180, 255, 0.1);
+  border-bottom: 1px solid rgb(45 180 255 / 10%);
 }
 
 .stat-value {
@@ -967,7 +966,7 @@ onMounted(() => {
 }
 
 .daily-item {
-  background: rgba(0, 80, 120, 0.3);
+  background: rgb(0 80 120 / 30%);
   border-radius: 4px;
   padding: 8px;
 }
@@ -993,7 +992,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(45, 180, 255, 0.1);
+  border-bottom: 1px solid rgb(45 180 255 / 10%);
 }
 
 .construction-item:last-child {
@@ -1021,9 +1020,9 @@ onMounted(() => {
 }
 
 .indicator-item {
-  background: rgba(0, 40, 80, 0.5);
+  background: rgb(0 40 80 / 50%);
   border-radius: 8px;
-  border: 1px solid rgba(45, 180, 255, 0.2);
+  border: 1px solid rgb(45 180 255 / 20%);
   padding: 15px;
   text-align: center;
 }
@@ -1050,9 +1049,9 @@ onMounted(() => {
 /* 地图区域 */
 .map-container {
   flex: 1;
-  background: rgba(0, 40, 80, 0.5);
+  background: rgb(0 40 80 / 50%);
   border-radius: 8px;
-  border: 1px solid rgba(45, 180, 255, 0.2);
+  border: 1px solid rgb(45 180 255 / 20%);
   position: relative;
   overflow: hidden;
 }
@@ -1101,7 +1100,7 @@ onMounted(() => {
 }
 
 .map-area:hover {
-  fill: rgba(74, 222, 128, 0.3) !important;
+  fill: rgb(74 222 128 / 30%) !important;
 }
 
 .risk-point {
@@ -1140,7 +1139,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-around;
   padding: 15px;
-  border-bottom: 1px solid rgba(45, 180, 255, 0.2);
+  border-bottom: 1px solid rgb(45 180 255 / 20%);
 }
 
 .warning-stat-item {
@@ -1178,7 +1177,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(45, 180, 255, 0.1);
+  border-bottom: 1px solid rgb(45 180 255 / 10%);
 }
 
 .region-status {
@@ -1188,7 +1187,7 @@ onMounted(() => {
 }
 
 .region-status.normal {
-  background: rgba(34, 197, 94, 0.2);
+  background: rgb(34 197 94 / 20%);
   color: #22c55e;
 }
 
@@ -1212,7 +1211,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(45, 180, 255, 0.1);
+  border-bottom: 1px solid rgb(45 180 255 / 10%);
 }
 
 .pump-status {
@@ -1222,7 +1221,7 @@ onMounted(() => {
 }
 
 .pump-status.normal {
-  background: rgba(34, 197, 94, 0.2);
+  background: rgb(34 197 94 / 20%);
   color: #22c55e;
 }
 
@@ -1326,7 +1325,7 @@ onMounted(() => {
 
 .rainy-item {
   padding: 8px 0;
-  border-bottom: 1px solid rgba(45, 180, 255, 0.1);
+  border-bottom: 1px solid rgb(45 180 255 / 10%);
 }
 
 .rainy-item:last-child {
@@ -1339,38 +1338,38 @@ onMounted(() => {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 40, 80, 0.3);
+  background: rgb(0 40 80 / 30%);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(45, 180, 255, 0.3);
+  background: rgb(45 180 255 / 30%);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(45, 180, 255, 0.5);
+  background: rgb(45 180 255 / 50%);
 }
 
 /* 自定义Element Plus样式 */
 .el-button {
   --el-button-text-color: #e0e6ed;
-  --el-button-bg-color: rgba(0, 100, 180, 0.5);
-  --el-button-border-color: rgba(45, 180, 255, 0.5);
+  --el-button-bg-color: rgb(0 100 180 / 50%);
+  --el-button-border-color: rgb(45 180 255 / 50%);
 }
 
 .el-button:hover {
-  --el-button-bg-color: rgba(0, 120, 200, 0.6);
-  --el-button-border-color: rgba(45, 180, 255, 0.8);
+  --el-button-bg-color: rgb(0 120 200 / 60%);
+  --el-button-border-color: rgb(45 180 255 / 80%);
 }
 
 .el-button--primary {
-  --el-button-primary-bg-color: rgba(0, 120, 200, 0.6);
-  --el-button-primary-border-color: rgba(45, 180, 255, 0.8);
+  --el-button-primary-bg-color: rgb(0 120 200 / 60%);
+  --el-button-primary-border-color: rgb(45 180 255 / 80%);
 }
 
 .el-button--success {
-  --el-button-success-bg-color: rgba(0, 150, 120, 0.6);
-  --el-button-success-border-color: rgba(74, 222, 128, 0.8);
+  --el-button-success-bg-color: rgb(0 150 120 / 60%);
+  --el-button-success-border-color: rgb(74 222 128 / 80%);
 }
 
 .el-tabs {
@@ -1386,19 +1385,20 @@ onMounted(() => {
 .el-table {
   --el-table-bg-color: transparent;
   --el-table-text-color: #e0e6ed;
+
   font-size: 12px;
 }
 
 .el-table td,
 .el-table th {
-  border-bottom: 1px solid rgba(45, 180, 255, 0.1);
+  border-bottom: 1px solid rgb(45 180 255 / 10%);
 }
 
 .el-table th {
-  background: rgba(0, 60, 100, 0.5);
+  background: rgb(0 60 100 / 50%);
 }
 
 .el-table tr:hover > td {
-  background: rgba(0, 80, 140, 0.4);
+  background: rgb(0 80 140 / 40%);
 }
 </style>

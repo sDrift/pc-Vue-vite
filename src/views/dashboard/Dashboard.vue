@@ -6,7 +6,7 @@
           <span>系统概览</span>
         </div>
       </template>
-      
+
       <div class="stats-grid">
         <el-card class="stat-card">
           <div class="stat-content">
@@ -17,7 +17,7 @@
             <el-icon-user size="28" />
           </div>
         </el-card>
-        
+
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-number">{{ totalProducts }}</div>
@@ -27,7 +27,7 @@
             <el-icon-goods size="28" />
           </div>
         </el-card>
-        
+
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-number">{{ totalOrders }}</div>
@@ -37,7 +37,7 @@
             <el-icon-shopping-cart size="28" />
           </div>
         </el-card>
-        
+
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-number">{{ totalRevenue }}</div>
@@ -49,7 +49,7 @@
         </el-card>
       </div>
     </el-card>
-    
+
     <div class="charts-container">
       <el-card class="chart-card">
         <template #header>
@@ -65,7 +65,7 @@
           </div>
         </div>
       </el-card>
-      
+
       <el-card class="chart-card">
         <template #header>
           <div class="card-header">
@@ -81,7 +81,7 @@
         </div>
       </el-card>
     </div>
-    
+
     <el-card class="recent-activities">
       <template #header>
         <div class="card-header">
@@ -99,8 +99,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import * as ElementPlusIconsVue from '@element-plus/icons-vue';
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import { ref } from 'vue'
 
 // 注册Element Plus图标
 const icons = {
@@ -109,8 +109,8 @@ const icons = {
   'el-icon-shopping-cart': ElementPlusIconsVue.ShoppingCart,
   'el-icon-money': ElementPlusIconsVue.Money,
   'el-icon-data-line': ElementPlusIconsVue.DataLine,
-  'el-icon-data-analysis': ElementPlusIconsVue.DataAnalysis
-};
+  'el-icon-data-analysis': ElementPlusIconsVue.DataAnalysis,
+}
 
 // 创建组件对象
 const components = {
@@ -119,14 +119,14 @@ const components = {
   'el-icon-shopping-cart': icons['el-icon-shopping-cart'],
   'el-icon-money': icons['el-icon-money'],
   'el-icon-data-line': icons['el-icon-data-line'],
-  'el-icon-data-analysis': icons['el-icon-data-analysis']
-};
+  'el-icon-data-analysis': icons['el-icon-data-analysis'],
+}
 
 // 统计数据
-const totalUsers = ref(256);
-const totalProducts = ref(128);
-const totalOrders = ref(1024);
-const totalRevenue = ref('¥1,280,000');
+const totalUsers = ref(256)
+const totalProducts = ref(128)
+const totalOrders = ref(1024)
+const totalRevenue = ref('¥1,280,000')
 
 // 最近活动数据
 const recentActivities = ref([
@@ -134,33 +134,33 @@ const recentActivities = ref([
     time: '2024-05-20 15:30:20',
     user: 'admin',
     action: '登录系统',
-    ip: '192.168.1.100'
+    ip: '192.168.1.100',
   },
   {
     time: '2024-05-20 15:25:10',
     user: 'user123',
     action: '修改了个人资料',
-    ip: '192.168.1.101'
+    ip: '192.168.1.101',
   },
   {
     time: '2024-05-20 15:10:45',
     user: 'editor',
     action: '发布了一篇新文章',
-    ip: '192.168.1.102'
+    ip: '192.168.1.102',
   },
   {
     time: '2024-05-20 14:55:30',
     user: 'admin',
     action: '添加了一个新用户',
-    ip: '192.168.1.100'
+    ip: '192.168.1.100',
   },
   {
     time: '2024-05-20 14:40:15',
     user: 'user456',
     action: '购买了一个产品',
-    ip: '192.168.1.103'
-  }
-]);
+    ip: '192.168.1.103',
+  },
+])
 </script>
 
 <style scoped>

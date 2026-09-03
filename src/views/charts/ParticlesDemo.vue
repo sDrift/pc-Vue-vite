@@ -28,13 +28,7 @@
                 <span>粒子数量</span>
                 <span class="num">{{ count }}</span>
               </div>
-              <el-slider
-                v-model="count"
-                :min="500"
-                :max="15000"
-                :step="500"
-                show-stops
-              />
+              <el-slider v-model="count" :min="500" :max="15000" :step="500" show-stops />
             </div>
 
             <div class="field">
@@ -42,12 +36,7 @@
                 <span>粒子尺寸</span>
                 <span class="num">{{ size.toFixed(2) }}</span>
               </div>
-              <el-slider
-                v-model="size"
-                :min="0.01"
-                :max="0.25"
-                :step="0.01"
-              />
+              <el-slider v-model="size" :min="0.01" :max="0.25" :step="0.01" />
             </div>
 
             <div class="field">
@@ -55,12 +44,7 @@
                 <span>运动速度</span>
                 <span class="num">{{ speed.toFixed(1) }}</span>
               </div>
-              <el-slider
-                v-model="speed"
-                :min="0"
-                :max="5"
-                :step="0.1"
-              />
+              <el-slider v-model="speed" :min="0" :max="5" :step="0.1" />
             </div>
 
             <div v-if="mode === 'sphere'" class="field">
@@ -68,12 +52,7 @@
                 <span>球体半径</span>
                 <span class="num">{{ sphereRadius.toFixed(1) }}</span>
               </div>
-              <el-slider
-                v-model="sphereRadius"
-                :min="2"
-                :max="12"
-                :step="0.5"
-              />
+              <el-slider v-model="sphereRadius" :min="2" :max="12" :step="0.5" />
             </div>
 
             <div v-if="mode === 'text'" class="field">
@@ -97,26 +76,10 @@
             </el-radio-group>
 
             <div class="custom-colors">
-              <el-color-picker
-                v-model="c1"
-                size="small"
-                title="颜色 1"
-              />
-              <el-color-picker
-                v-model="c2"
-                size="small"
-                title="颜色 2"
-              />
-              <el-color-picker
-                v-model="c3"
-                size="small"
-                title="颜色 3"
-              />
-              <el-color-picker
-                v-model="c4"
-                size="small"
-                title="颜色 4"
-              />
+              <el-color-picker v-model="c1" size="small" title="颜色 1" />
+              <el-color-picker v-model="c2" size="small" title="颜色 2" />
+              <el-color-picker v-model="c3" size="small" title="颜色 3" />
+              <el-color-picker v-model="c4" size="small" title="颜色 4" />
             </div>
 
             <el-divider />
@@ -128,24 +91,14 @@
             </div>
 
             <div class="field inline">
-              <el-switch
-                v-model="autoRotate"
-                active-text="自动旋转"
-              />
+              <el-switch v-model="autoRotate" active-text="自动旋转" />
             </div>
 
             <div class="field inline">
-              <el-switch
-                v-model="interactive"
-                active-text="允许鼠标拖拽"
-              />
+              <el-switch v-model="interactive" active-text="允许鼠标拖拽" />
             </div>
 
-            <el-button
-              type="primary"
-              class="rebuild-btn"
-              @click="forceRebuild"
-            >
+            <el-button type="primary" class="rebuild-btn" @click="forceRebuild">
               重新生成粒子
             </el-button>
           </div>
@@ -180,68 +133,73 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, markRaw } from 'vue';
-import ThreeParticles from '../../components/ThreeParticles.vue';
+import { ref, computed, watch, markRaw } from 'vue'
 
-const particlesRef = ref(null);
-const lastClick = ref(null);
+import ThreeParticles from '../../components/ThreeParticles.vue'
+
+const particlesRef = ref(null)
+const lastClick = ref(null)
 
 /* ========== 模式 ========== */
-const mode = ref('nebula');
+const mode = ref('nebula')
 const modeLabelMap = {
   nebula: '星云扩散模式',
   sphere: '粒子球体模式',
   text: '文字粒子模式',
-};
-const currentModeLabel = computed(() => modeLabelMap[mode.value] || '');
+}
+const currentModeLabel = computed(() => modeLabelMap[mode.value] || '')
 
 /* ========== 基础参数 ========== */
-const count = ref(3000);
-const size = ref(0.06);
-const speed = ref(1.0);
-const sphereRadius = ref(5);
-const text = ref('THREE.JS');
+const count = ref(3000)
+const size = ref(0.06)
+const speed = ref(1.0)
+const sphereRadius = ref(5)
+const text = ref('THREE.JS')
 
 /* ========== 颜色主题 ========== */
-const themeKey = ref('ocean');
+const themeKey = ref('ocean')
 const themeMap = {
-  ocean:  ['#00c6ff', '#0072ff', '#8e2de2', '#4a00e0'],
+  ocean: ['#00c6ff', '#0072ff', '#8e2de2', '#4a00e0'],
   sunset: ['#ff512f', '#f09819', '#ff6a00', '#ee0979'],
   forest: ['#11998e', '#38ef7d', '#56ab2f', '#a8e063'],
-  neon:   ['#fc00ff', '#00dbde', '#f7ff00', '#ff0080'],
-};
-const c1 = ref(themeMap.ocean[0]);
-const c2 = ref(themeMap.ocean[1]);
-const c3 = ref(themeMap.ocean[2]);
-const c4 = ref(themeMap.ocean[3]);
+  neon: ['#fc00ff', '#00dbde', '#f7ff00', '#ff0080'],
+}
+const c1 = ref(themeMap.ocean[0])
+const c2 = ref(themeMap.ocean[1])
+const c3 = ref(themeMap.ocean[2])
+const c4 = ref(themeMap.ocean[3])
 
 // 切换主题时更新自定义颜色
 watch(themeKey, (k) => {
-  const [a, b, c, d] = themeMap[k];
-  c1.value = a; c2.value = b; c3.value = c; c4.value = d;
-});
+  const [a, b, c, d] = themeMap[k]
+
+  c1.value = a
+  c2.value = b
+  c3.value = c
+  c4.value = d
+})
 
 const activeColors = computed(() => {
-  return [c1.value, c2.value, c3.value, c4.value].filter(Boolean);
-});
+  return [c1.value, c2.value, c3.value, c4.value].filter(Boolean)
+})
 
 /* ========== 外观 ========== */
-const backgroundColor = ref('#03060d');
-const autoRotate = ref(true);
-const interactive = ref(true);
+const backgroundColor = ref('#03060d')
+const autoRotate = ref(true)
+const interactive = ref(true)
 
 /* ========== 操作 ========== */
 const forceRebuild = () => {
-  particlesRef.value?.rebuild();
-};
+  particlesRef.value?.rebuild()
+}
 
 const onReady = (info) => {
-  console.log('ThreeParticles ready:', info);
-};
+  console.log('ThreeParticles ready:', info)
+}
 
 const onClick = (info) => {
-  lastClick.value = { x: info.x, y: info.y };
-};
+  lastClick.value = { x: info.x, y: info.y }
+}
 </script>
 
 <style scoped>
@@ -319,7 +277,7 @@ const onClick = (info) => {
   left: 12px;
   bottom: 10px;
   padding: 4px 10px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgb(0 0 0 / 50%);
   color: #fff;
   border-radius: 4px;
   font-size: 12px;

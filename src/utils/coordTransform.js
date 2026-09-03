@@ -19,6 +19,7 @@
 const PI = Math.PI
 // 克拉索夫斯基椭球参数（GCJ-02 算法用）
 const A = 6378245.0
+// eslint-disable-next-line no-loss-of-precision -- GCJ-02 偏心率平方常数，需保留完整精度
 const EE = 0.00669342162296594323 // 偏心率平方
 
 /**
@@ -33,17 +34,21 @@ function outOfChina(lng, lat) {
 
 function transformLat(x, y) {
   let ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x))
-  ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0
-  ret += (20.0 * Math.sin(y * PI) + 40.0 * Math.sin(y / 3.0 * PI)) * 2.0 / 3.0
-  ret += (160.0 * Math.sin(y / 12.0 * PI) + 320 * Math.sin(y * PI / 30.0)) * 2.0 / 3.0
+
+  ret += ((20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0) / 3.0
+  ret += ((20.0 * Math.sin(y * PI) + 40.0 * Math.sin((y / 3.0) * PI)) * 2.0) / 3.0
+  ret += ((160.0 * Math.sin((y / 12.0) * PI) + 320 * Math.sin((y * PI) / 30.0)) * 2.0) / 3.0
+
   return ret
 }
 
 function transformLng(x, y) {
   let ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x))
-  ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0
-  ret += (20.0 * Math.sin(x * PI) + 40.0 * Math.sin(x / 3.0 * PI)) * 2.0 / 3.0
-  ret += (150.0 * Math.sin(x / 12.0 * PI) + 300.0 * Math.sin(x / 30.0 * PI)) * 2.0 / 3.0
+
+  ret += ((20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0) / 3.0
+  ret += ((20.0 * Math.sin(x * PI) + 40.0 * Math.sin((x / 3.0) * PI)) * 2.0) / 3.0
+  ret += ((150.0 * Math.sin((x / 12.0) * PI) + 300.0 * Math.sin((x / 30.0) * PI)) * 2.0) / 3.0
+
   return ret
 }
 
@@ -59,10 +64,13 @@ export function wgs84ToGcj02(lng, lat) {
   let dLng = transformLng(lng - 105.0, lat - 35.0)
   const radLat = (lat / 180.0) * PI
   let magic = Math.sin(radLat)
+
   magic = 1 - EE * magic * magic
   const sqrtMagic = Math.sqrt(magic)
+
   dLat = (dLat * 180.0) / (((A * (1 - EE)) / (magic * sqrtMagic)) * PI)
   dLng = (dLng * 180.0) / ((A / sqrtMagic) * Math.cos(radLat) * PI)
+
   return [lng + dLng, lat + dLat]
 }
 
@@ -76,6 +84,7 @@ export function wgs84ToGcj02(lng, lat) {
 export function gcj02ToWgs84(lng, lat) {
   if (outOfChina(lng, lat)) return [lng, lat]
   const [gcjLng, gcjLat] = wgs84ToGcj02(lng, lat)
+
   return [lng * 2 - gcjLng, lat * 2 - gcjLat]
 }
 
@@ -111,10 +120,7 @@ export function getGcj02EcefDelta(Cesium, longitude, latitude, height = 0) {
   const gcj02Ecef = Cesium.Cartesian3.fromDegrees(gcjLng, gcjLat, height)
 
   // delta = GCJ-02 ECEF - WGS-84 ECEF
-  const delta = Cesium.Cartesian3.subtract(
-    gcj02Ecef,
-    wgs84Ecef,
-    new Cesium.Cartesian3()
-  )
+  const delta = Cesium.Cartesian3.subtract(gcj02Ecef, wgs84Ecef, new Cesium.Cartesian3())
+
   return delta
 }

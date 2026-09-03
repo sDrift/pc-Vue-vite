@@ -1,6 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { getDynamicRoutes } from '../api/menu.js';
-import { buildRoutes } from './dynamic.js';
+import { createRouter, createWebHistory } from 'vue-router'
+
+import { getDynamicRoutes } from '../api/menu.js'
+
+import { buildRoutes } from './dynamic.js'
 
 /* ------------------------------------------------------------------
  * 静态路由
@@ -27,8 +29,8 @@ const routes = [
         component: () => import('../views/dashboard/Dashboard.vue'),
         meta: {
           title: '仪表盘',
-          icon: 'el-icon-data-line'
-        }
+          icon: 'el-icon-data-line',
+        },
       },
       {
         path: 'users',
@@ -36,8 +38,8 @@ const routes = [
         component: () => import('../views/users/Users.vue'),
         meta: {
           title: '用户管理',
-          icon: 'el-icon-user'
-        }
+          icon: 'el-icon-user',
+        },
       },
       {
         path: 'products',
@@ -45,8 +47,8 @@ const routes = [
         component: () => import('../views/products/Products.vue'),
         meta: {
           title: '产品管理',
-          icon: 'el-icon-goods'
-        }
+          icon: 'el-icon-goods',
+        },
       },
       {
         path: 'settings',
@@ -54,8 +56,8 @@ const routes = [
         component: () => import('../views/settings/Settings.vue'),
         meta: {
           title: '系统设置',
-          icon: 'el-icon-setting'
-        }
+          icon: 'el-icon-setting',
+        },
       },
 
       // 城市内涝治理
@@ -78,31 +80,31 @@ const routes = [
       //     icon: 'el-icon-data-table'
       //   }
       // }
-    ]
+    ],
   },
   {
     path: '/login',
     name: 'Login',
     component: () => import('../views/auth/Login.vue'),
     meta: {
-      title: '登录'
-    }
+      title: '登录',
+    },
   },
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('../views/auth/NotFound.vue'),
     meta: {
-      title: '页面不存在'
-    }
-  }
-];
+      title: '页面不存在',
+    },
+  },
+]
 
 // 创建路由实例
 const router = createRouter({
   history: createWebHistory(),
-  routes
-});
+  routes,
+})
 
 /* 动态路由是否已加载（幂等控制，避免重复注入） */
 let dynamicRoutesLoaded = false
@@ -141,9 +143,11 @@ export async function loadDynamicRoutes() {
     })
 
     lastInjectedRoutes = resolved
+
     return resolved
   } catch (err) {
     console.error('[动态路由] 加载失败:', err)
+
     return []
   }
 }
@@ -172,29 +176,31 @@ export function resetDynamicRoutes() {
  */
 router.beforeEach(async (to, from, next) => {
   // 设置页面标题
-  document.title = to.meta.title || '后台管理系统';
+  document.title = to.meta.title || '后台管理系统'
 
   // 检查是否需要登录
-  const isLogin = localStorage.getItem('isLogin') === 'true';
+  const isLogin = localStorage.getItem('isLogin') === 'true'
+
   if (!isLogin && to.path !== '/login') {
-    return next('/login');
+    return next('/login')
   }
   // 已登录还去登录页，直接送回首页
   if (isLogin && to.path === '/login') {
-    return next('/dashboard');
+    return next('/dashboard')
   }
   // 登录页本身放行
   if (to.path === '/login') {
-    return next();
+    return next()
   }
 
   // 已登录且动态路由未加载：先加载，再按原 path 重新导航触发匹配
   if (!dynamicRoutesLoaded) {
-    await loadDynamicRoutes();
-    return next({ path: to.path, query: to.query, hash: to.hash, replace: true });
+    await loadDynamicRoutes()
+
+    return next({ path: to.path, query: to.query, hash: to.hash, replace: true })
   }
 
-  next();
-});
+  next()
+})
 
-export default router;
+export default router

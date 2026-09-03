@@ -40,6 +40,7 @@ export const manualChunks = (id) => {
   if (/[\\/]node_modules[\\/](ol)[\\/]/.test(id)) {
     return 'vendor-ol'
   }
+
   // 6. 其它三方依赖
   return 'vendor-common'
 }

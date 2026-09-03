@@ -17,16 +17,14 @@
 
 /* 预扫 src/views 和 src/components 下所有 .vue 文件。
    glob 的 key 是相对当前文件的路径，如 '../views/charts/ChartDemo.vue' */
-const moduleMap = import.meta.glob([
-  '../views/**/*.vue',
-  '../components/**/*.vue',
-])
+const moduleMap = import.meta.glob(['../views/**/*.vue', '../components/**/*.vue'])
 
 /* 把「相对 src 的路径」转成「相对当前文件的路径」作为 glob key。
    例：'views/charts/ChartDemo.vue' → '../views/charts/ChartDemo.vue' */
 function toGlobKey(srcRelativePath) {
   if (!srcRelativePath) return null
   const normalized = srcRelativePath.replace(/^\/+/, '')
+
   return normalized.startsWith('../') ? normalized : `../${normalized}`
 }
 
@@ -37,10 +35,13 @@ function resolveComponent(componentPath) {
 
   const key = toGlobKey(componentPath)
   const loader = moduleMap[key]
+
   if (!loader) {
     console.warn(`[dynamic routes] 找不到组件: ${componentPath}`)
+
     return undefined
   }
+
   return loader
 }
 

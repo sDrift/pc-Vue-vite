@@ -14,21 +14,20 @@
 </template>
 
 <script>
-import ThreeDPieH from '@/other/3DpieH.vue';
+import ThreeDPieH from '@/other/3DpieH.vue'
 
 export default {
   name: 'ThreeDPieChartView',
   components: {
-    ThreeDPieH
+    ThreeDPieH,
   },
   data() {
-    return {
-    };
+    return {}
   },
   mounted() {
     // 组件挂载后的逻辑
-  }
-};
+  },
+}
 </script>
 
 <style scoped>
@@ -47,7 +46,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #ffffff;
+  color: #fff;
   font-size: 18px;
   font-weight: 500;
 }

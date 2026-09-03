@@ -20,11 +20,7 @@
             </el-radio-group>
 
             <div v-if="action === 'walk'" class="field">
-              <el-switch
-                v-model="moveForward"
-                active-text="向前位移"
-                inactive-text="原地踏步"
-              />
+              <el-switch v-model="moveForward" active-text="向前位移" inactive-text="原地踏步" />
             </div>
 
             <el-divider />
@@ -36,12 +32,7 @@
                 <span>速度</span>
                 <span class="num">{{ speed.toFixed(2) }}x</span>
               </div>
-              <el-slider
-                v-model="speed"
-                :min="0.1"
-                :max="3"
-                :step="0.05"
-              />
+              <el-slider v-model="speed" :min="0.1" :max="3" :step="0.05" />
             </div>
 
             <div class="field">
@@ -49,12 +40,7 @@
                 <span>模型缩放</span>
                 <span class="num">{{ scale.toFixed(2) }}x</span>
               </div>
-              <el-slider
-                v-model="scale"
-                :min="0.5"
-                :max="2.5"
-                :step="0.05"
-              />
+              <el-slider v-model="scale" :min="0.5" :max="2.5" :step="0.05" />
             </div>
 
             <div class="field inline">
@@ -98,18 +84,16 @@
             <h4>快速外观</h4>
             <div class="presets">
               <el-button size="small" @click="applyPreset('student')">学生</el-button>
-              <el-button size="small" type="success" @click="applyPreset('soldier')">士兵</el-button>
-              <el-button size="small" type="warning" @click="applyPreset('fireman')">消防员</el-button>
+              <el-button size="small" type="success" @click="applyPreset('soldier')">
+                士兵
+              </el-button>
+              <el-button size="small" type="warning" @click="applyPreset('fireman')">
+                消防员
+              </el-button>
               <el-button size="small" type="danger" @click="applyPreset('zombie')">丧尸</el-button>
             </div>
 
-            <el-button
-              type="primary"
-              class="rebuild-btn"
-              @click="rebuild"
-            >
-              重建人物
-            </el-button>
+            <el-button type="primary" class="rebuild-btn" @click="rebuild">重建人物</el-button>
           </div>
         </el-col>
 
@@ -133,9 +117,7 @@
               :interactive="true"
               @ready="onReady"
             />
-            <div class="tips">
-              💡 鼠标左键旋转 / 右键平移 / 滚轮缩放
-            </div>
+            <div class="tips">💡 鼠标左键旋转 / 右键平移 / 滚轮缩放</div>
           </div>
         </el-col>
       </el-row>
@@ -144,61 +126,79 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import Character3D from '../../components/Character3D.vue';
+import { ref } from 'vue'
 
-const charRef = ref(null);
+import Character3D from '../../components/Character3D.vue'
+
+const charRef = ref(null)
 
 /* 动作 */
-const action = ref('idle');
-const moveForward = ref(false);
+const action = ref('idle')
+const moveForward = ref(false)
 
 /* 参数 */
-const speed = ref(1.0);
-const scale = ref(1.0);
-const autoRotate = ref(false);
-const showGround = ref(true);
+const speed = ref(1.0)
+const scale = ref(1.0)
+const autoRotate = ref(false)
+const showGround = ref(true)
 
 /* 颜色 */
-const skinColor = ref('#f2c6a0');
-const shirtColor = ref('#4a90e2');
-const pantsColor = ref('#2c3e50');
-const shoeColor = ref('#1a1a1a');
-const hairColor = ref('#3d2817');
-const backgroundColor = ref('#f0f0f0');
+const skinColor = ref('#f2c6a0')
+const shirtColor = ref('#4a90e2')
+const pantsColor = ref('#2c3e50')
+const shoeColor = ref('#1a1a1a')
+const hairColor = ref('#3d2817')
+const backgroundColor = ref('#f0f0f0')
 
 /* 预设 */
 const presets = {
   student: {
-    skin: '#f7d2b0', shirt: '#ffffff', pants: '#274b8a', shoes: '#222222', hair: '#1f1712',
+    skin: '#f7d2b0',
+    shirt: '#ffffff',
+    pants: '#274b8a',
+    shoes: '#222222',
+    hair: '#1f1712',
   },
   soldier: {
-    skin: '#cfa37b', shirt: '#4b5320', pants: '#3a3f1a', shoes: '#1d1d1d', hair: '#2a1a10',
+    skin: '#cfa37b',
+    shirt: '#4b5320',
+    pants: '#3a3f1a',
+    shoes: '#1d1d1d',
+    hair: '#2a1a10',
   },
   fireman: {
-    skin: '#f2c6a0', shirt: '#e63946', pants: '#ffb703', shoes: '#000000', hair: '#2a1a10',
+    skin: '#f2c6a0',
+    shirt: '#e63946',
+    pants: '#ffb703',
+    shoes: '#000000',
+    hair: '#2a1a10',
   },
   zombie: {
-    skin: '#8aa66a', shirt: '#6b4226', pants: '#4e4137', shoes: '#3b2f26', hair: '#5c4a35',
+    skin: '#8aa66a',
+    shirt: '#6b4226',
+    pants: '#4e4137',
+    shoes: '#3b2f26',
+    hair: '#5c4a35',
   },
-};
+}
 const applyPreset = (key) => {
-  const p = presets[key];
-  if (!p) return;
-  skinColor.value = p.skin;
-  shirtColor.value = p.shirt;
-  pantsColor.value = p.pants;
-  shoeColor.value = p.shoes;
-  hairColor.value = p.hair;
-};
+  const p = presets[key]
+
+  if (!p) return
+  skinColor.value = p.skin
+  shirtColor.value = p.shirt
+  pantsColor.value = p.pants
+  shoeColor.value = p.shoes
+  hairColor.value = p.hair
+}
 
 const onReady = (info) => {
-  console.log('Character3D ready:', info);
-};
+  console.log('Character3D ready:', info)
+}
 
 const rebuild = () => {
-  charRef.value?.rebuild();
-};
+  charRef.value?.rebuild()
+}
 </script>
 
 <style scoped>
@@ -284,7 +284,7 @@ const rebuild = () => {
   left: 12px;
   bottom: 10px;
   padding: 4px 10px;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgb(0 0 0 / 45%);
   color: #fff;
   border-radius: 4px;
   font-size: 12px;

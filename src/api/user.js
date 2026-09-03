@@ -70,12 +70,18 @@ export function exportUsers(params) {
  * @param {number} userId
  */
 export function uploadAvatar(file, userId) {
-  return request.upload('/users/avatar', file, { userId }, {
-    onUploadProgress: (e) => {
-      const percent = Math.round((e.loaded * 100) / e.total)
-      console.log(`上传进度 ${percent}%`)
+  return request.upload(
+    '/users/avatar',
+    file,
+    { userId },
+    {
+      onUploadProgress: (e) => {
+        const percent = Math.round((e.loaded * 100) / e.total)
+
+        console.log(`上传进度 ${percent}%`)
+      },
     },
-  })
+  )
 }
 
 export default {

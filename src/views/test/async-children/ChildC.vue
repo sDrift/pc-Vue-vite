@@ -40,38 +40,40 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import { ElMessage } from 'element-plus';
+import { ElMessage } from 'element-plus'
+import { ref, reactive, onMounted } from 'vue'
 
-const loadTime = ref(0);
+const loadTime = ref(0)
 const form = reactive({
   name: '',
   email: '',
   gender: 'male',
   hobbies: [],
-});
+})
 
 onMounted(() => {
-  const t = performance.now();
-  console.log('[ChildC] 已挂载，时间戳:', t.toFixed(2));
-  loadTime.value = t.toFixed(0);
-});
+  const t = performance.now()
+
+  console.log('[ChildC] 已挂载，时间戳:', t.toFixed(2))
+  loadTime.value = t.toFixed(0)
+})
 
 const onSubmit = () => {
   if (!form.name) {
-    ElMessage.warning('请输入姓名');
-    return;
+    ElMessage.warning('请输入姓名')
+
+    return
   }
-  ElMessage.success(`提交成功：${form.name}`);
-  console.log('[ChildC] 提交：', { ...form });
-};
+  ElMessage.success(`提交成功：${form.name}`)
+  console.log('[ChildC] 提交：', { ...form })
+}
 
 const onReset = () => {
-  form.name = '';
-  form.email = '';
-  form.gender = 'male';
-  form.hobbies = [];
-};
+  form.name = ''
+  form.email = ''
+  form.gender = 'male'
+  form.hobbies = []
+}
 </script>
 
 <style scoped>
@@ -80,16 +82,19 @@ const onReset = () => {
   border-radius: 10px;
   animation: fade-in 0.35s ease;
 }
+
 .child-c {
   background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
   border: 1px solid #81c784;
 }
+
 .child-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
 }
+
 .tag {
   padding: 2px 10px;
   background: #2e7d32;
@@ -97,28 +102,47 @@ const onReset = () => {
   border-radius: 4px;
   font-size: 12px;
 }
+
 .load-time {
   font-size: 12px;
   color: #1b5e20;
 }
-h2 { margin: 0 0 8px; color: #1b5e20; }
-p { margin: 0 0 18px; color: #2e7d32; }
+
+h2 {
+  margin: 0 0 8px;
+  color: #1b5e20;
+}
+
+p {
+  margin: 0 0 18px;
+  color: #2e7d32;
+}
+
 .form {
-  background: rgba(255,255,255,0.6);
+  background: rgb(255 255 255 / 60%);
   padding: 18px 18px 4px;
   border-radius: 8px;
   margin-bottom: 16px;
 }
+
 .hint {
   margin-top: 12px;
   padding: 10px 14px;
-  background: rgba(255,255,255,0.5);
+  background: rgb(255 255 255 / 50%);
   border-radius: 6px;
   font-size: 13px;
   color: #1b5e20;
 }
+
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

@@ -33,5 +33,5 @@ export const warmupClientFiles = [
   './src/main.js',
   './src/App.vue',
   './src/router/index.js',
-  './src/store/index.js',  // 如果有，没有也不报错（warmup 容错）
+  './src/store/index.js', // 如果有，没有也不报错（warmup 容错）
 ]

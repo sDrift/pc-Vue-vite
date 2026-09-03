@@ -4,20 +4,20 @@
       <div class="not-found-code">404</div>
       <div class="not-found-message">抱歉，您访问的页面不存在</div>
       <div class="not-found-tip">可能是因为页面已被删除、移动或者您输入了错误的地址</div>
-      <el-button type="primary" @click="goBack" class="go-back-button">返回首页</el-button>
+      <el-button type="primary" class="go-back-button" @click="goBack">返回首页</el-button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
+const router = useRouter()
 
 // 返回首页
 const goBack = () => {
-  router.push('/dashboard');
-};
+  router.push('/dashboard')
+}
 </script>
 
 <style scoped>
@@ -34,7 +34,7 @@ const goBack = () => {
   padding: 60px 40px;
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
 }
 
 .not-found-code {

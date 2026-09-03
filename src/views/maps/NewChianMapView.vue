@@ -6,14 +6,14 @@
 </template>
 
 <script>
-import NewChianMap from '@/components/NewChinaMap.vue';
+import NewChianMap from '@/components/NewChinaMap.vue'
 
 export default {
   name: 'NewChianMapView',
   components: {
-    NewChianMap
-  }
-};
+    NewChianMap,
+  },
+}
 </script>
 
 <style scoped>

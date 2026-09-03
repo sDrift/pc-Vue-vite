@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Lint cache（本地缓存，不入库）
+.eslintcache
+.stylelintcache
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

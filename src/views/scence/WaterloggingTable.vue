@@ -2,11 +2,21 @@
   <div class="waterlogging-table-page">
     <!-- 搜索栏 -->
     <div class="search-bar">
-      <el-select v-model="searchForm.pointName" placeholder="点位名称查询" clearable class="search-select">
+      <el-select
+        v-model="searchForm.pointName"
+        placeholder="点位名称查询"
+        clearable
+        class="search-select"
+      >
         <el-option label="选项1" value="1" />
         <el-option label="选项2" value="2" />
       </el-select>
-      <el-select v-model="searchForm.district" placeholder="区县查询" clearable class="search-select">
+      <el-select
+        v-model="searchForm.district"
+        placeholder="区县查询"
+        clearable
+        class="search-select"
+      >
         <el-option label="渝中区" value="yuzhong" />
         <el-option label="江北区" value="jiangbei" />
         <el-option label="九龙坡区" value="jiulongpo" />
@@ -47,24 +57,30 @@
     <div class="bottom-bar">
       <div class="bottom-left">
         <el-button type="primary" class="bottom-btn">
-          <el-icon><Document /></el-icon> 最新事态
+          <el-icon><Document /></el-icon>
+          最新事态
         </el-button>
         <el-button type="primary" class="bottom-btn">
-          <el-icon><MapLocation /></el-icon> 区域预警
+          <el-icon><MapLocation /></el-icon>
+          区域预警
         </el-button>
         <el-button type="primary" class="bottom-btn">
-          <el-icon><Location /></el-icon> 点位预警
+          <el-icon><Location /></el-icon>
+          点位预警
         </el-button>
         <el-button type="primary" class="bottom-btn">
-          <el-icon><Bell /></el-icon> 点位告警
+          <el-icon><Bell /></el-icon>
+          点位告警
         </el-button>
       </div>
       <div class="bottom-right">
         <el-button type="primary" class="bottom-btn">
-          <el-icon><Setting /></el-icon> 组件
+          <el-icon><Setting /></el-icon>
+          组件
         </el-button>
         <el-button type="success" class="bottom-btn">
-          <el-icon><Cpu /></el-icon> 智能巡检
+          <el-icon><Cpu /></el-icon>
+          智能巡检
         </el-button>
       </div>
     </div>
@@ -72,13 +88,13 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
 import { Document, MapLocation, Location, Bell, Setting, Cpu } from '@element-plus/icons-vue'
+import { ref, reactive } from 'vue'
 
 const searchForm = reactive({
   pointName: '',
   district: '',
-  level: ''
+  level: '',
 })
 
 const tableData = ref([
@@ -89,7 +105,7 @@ const tableData = ref([
     levelText: '一级预警',
     rainfall: '36.2mm',
     threshold: '29mm',
-    warningTime: '5/23 15:00-5/24 15:00'
+    warningTime: '5/23 15:00-5/24 15:00',
   },
   {
     index: 2,
@@ -98,7 +114,7 @@ const tableData = ref([
     levelText: '二级预警',
     rainfall: '36.2mm',
     threshold: '29mm',
-    warningTime: '5/23 15:00-5/24 15:00'
+    warningTime: '5/23 15:00-5/24 15:00',
   },
   {
     index: 3,
@@ -107,7 +123,7 @@ const tableData = ref([
     levelText: '三级预警',
     rainfall: '36.2mm',
     threshold: '29mm',
-    warningTime: '5/23 15:00-5/24 15:00'
+    warningTime: '5/23 15:00-5/24 15:00',
   },
   {
     index: 4,
@@ -116,8 +132,8 @@ const tableData = ref([
     levelText: '四级预警',
     rainfall: '36.2mm',
     threshold: '29mm',
-    warningTime: '5/23 15:00-5/24 15:00'
-  }
+    warningTime: '5/23 15:00-5/24 15:00',
+  },
 ])
 
 const handleSearch = () => {

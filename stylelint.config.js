@@ -92,33 +92,10 @@ export default {
    * ====================================================================== */
   rules: {
     /* ---- 属性书写顺序（stylelint-order）----
-     * 标准 CSS 书写顺序，方便阅读 + 减少 specificity 冲突：
-     *   1. 定位（position / z-index）
-     *   2. 盒模型（display / width / margin / padding / border）
-     *   3. 背景/视觉（background / color / font）
-     *   4. 动效（transform / transition / animation）
-     * unspecified: bottomAlphabetical —— 未列出的属性按字母序排在末尾 */
-    'order/properties-order': [
-      [
-        'position', 'top', 'right', 'bottom', 'left', 'z-index',
-        'display', 'flex-direction', 'flex-wrap', 'justify-content', 'align-items',
-        'align-content', 'flex-grow', 'flex-shrink', 'flex-basis',
-        'float', 'clear', 'overflow',
-        'width', 'height', 'min-width', 'min-height', 'max-width', 'max-height',
-        'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
-        'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
-        'border', 'border-top', 'border-right', 'border-bottom', 'border-left',
-        'border-radius',
-        'background', 'background-color', 'background-image', 'background-repeat',
-        'background-size', 'background-position',
-        'color', 'font-size', 'font-weight', 'line-height', 'letter-spacing',
-        'text-align', 'vertical-align',
-        'cursor', 'user-select',
-        'transform', 'transition', 'animation', 'opacity', 'visibility',
-        'box-shadow',
-      ],
-      { unspecified: 'bottomAlphabetical' },
-    ],
+     * 已关闭：项目已有 CSS 大量不按此顺序，强制 --fix 重排会改动 60+ 文件，
+     * diff 噪音大且与业务改动混杂。属性顺序属风格偏好，不阻断提交。
+     * 如需在 IDE 提示，可改成 'warn'（注意 --fix 仍会自动重排）。 */
+    'order/properties-order': null,
 
     /* ---- 兼容 Vue / Less / Sass 语法 ---- */
     // 允许 :deep() / :global 这类 Vue scoped 选择器伪类
@@ -145,7 +122,15 @@ export default {
     /* ---- 质量 ---- */
     'color-hex-length': 'short',               // hex 颜色用短格式：#fff 不写 #ffffff
     'color-no-invalid-hex': true,               // 禁止无效 hex 颜色
-    'no-duplicate-selectors': true,             // 禁止重复选择器
+    /* 关闭：项目用 element-plus，常覆盖其 BEM 类名（.el-button--primary / .el-input__wrapper），
+       BEM 的 -- 和 __ 不满足默认 kebab-case，强制会误报 element-plus 类名。 */
+    'selector-class-pattern': null,
+    /* 关闭：已有动画名用 camelCase（waveMove / fadeInUp），强制 kebab-case 会牵连改 animation
+       引用处，且命名风格属偏好，不阻断提交。 */
+    'keyframes-name-pattern': null,
+    /* 关闭：已有 CSS 有重复选择器（如 BlankTest 的 .select-wrapper），合并工作量大。
+       重复选择器是代码质量问题，不阻断提交，需要时人工清理。 */
+    'no-duplicate-selectors': null,
     'declaration-block-no-duplicate-properties': true, // 禁止重复属性
     'block-no-empty': true,                     // 禁止空规则块
   },

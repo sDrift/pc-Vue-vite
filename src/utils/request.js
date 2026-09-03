@@ -35,17 +35,20 @@ const pendingMap = new Map()
 /** 生成请求唯一 key */
 const genKey = (config) => {
   const { method, url, params, data } = config
+
   return [method, url, JSON.stringify(params || {}), JSON.stringify(data || {})].join('&')
 }
 
 /** 加入 pending */
 const addPending = (config) => {
   const key = genKey(config)
+
   if (pendingMap.has(key)) {
     // 已有同 key 在飞：取消掉旧的（保留新的）
     pendingMap.get(key).controller.abort()
   }
   const controller = new AbortController()
+
   config.signal = controller.signal
   pendingMap.set(key, { controller, time: Date.now() })
 }
@@ -53,6 +56,7 @@ const addPending = (config) => {
 /** 移除 pending */
 const removePending = (config) => {
   const key = genKey(config)
+
   pendingMap.delete(key)
 }
 
@@ -60,11 +64,7 @@ const removePending = (config) => {
  * token 管理：从 localStorage / sessionStorage 取，可按项目实际改
  * ====================================================================== */
 const getToken = () => {
-  return (
-    localStorage.getItem('token') ||
-    sessionStorage.getItem('token') ||
-    ''
-  )
+  return localStorage.getItem('token') || sessionStorage.getItem('token') || ''
 }
 
 /* ======================================================================
@@ -73,7 +73,7 @@ const getToken = () => {
 const service = axios.create({
   baseURL: BASE_URL,
   timeout: TIMEOUT,
-  withCredentials: false,   // 跨域是否带 cookie
+  withCredentials: false, // 跨域是否带 cookie
   headers: {
     'X-Requested-with': 'XMLHttpRequest',
   },
@@ -86,6 +86,7 @@ service.interceptors.request.use(
   (config) => {
     // 1. 注入 token
     const token = getToken()
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -105,7 +106,7 @@ service.interceptors.request.use(
   (err) => {
     // 请求未发出（极少见）
     return Promise.reject(err)
-  }
+  },
 )
 
 /* ======================================================================
@@ -130,6 +131,7 @@ service.interceptors.response.use(
     }
 
     const res = response.data
+
     // 3. 不是标准对象结构，直接返回（如纯字符串）
     if (res == null || typeof res !== 'object') {
       return res
@@ -150,22 +152,27 @@ service.interceptors.response.use(
         confirmButtonText: '重新登录',
         cancelButtonText: '取消',
         type: 'warning',
-      }).then(() => {
-        localStorage.removeItem('token')
-        sessionStorage.removeItem('token')
-        location.reload()
-      }).catch(() => {})
+      })
+        .then(() => {
+          localStorage.removeItem('token')
+          sessionStorage.removeItem('token')
+          location.reload()
+        })
+        .catch(() => {})
+
       return Promise.reject(new Error(message))
     }
 
     // 6. 403：无权限
     if (code === 403) {
       ElMessage.error(`无权限：${message}`)
+
       return Promise.reject(new Error(message))
     }
 
     // 7. 其它业务错误
     ElMessage.error(message)
+
     return Promise.reject(new Error(message))
   },
   (error) => {
@@ -181,27 +188,47 @@ service.interceptors.response.use(
     if (response) {
       // HTTP 状态码错误
       const status = response.status
+
       switch (status) {
-        case 400: errMsg = '请求参数错误'; break
+        case 400:
+          errMsg = '请求参数错误'
+          break
         case 401:
           errMsg = '未授权，请重新登录'
           ElMessageBox.confirm('登录状态已过期，请重新登录', '提示', {
             confirmButtonText: '重新登录',
             type: 'warning',
-          }).then(() => {
-            localStorage.removeItem('token')
-            sessionStorage.removeItem('token')
-            location.reload()
-          }).catch(() => {})
+          })
+            .then(() => {
+              localStorage.removeItem('token')
+              sessionStorage.removeItem('token')
+              location.reload()
+            })
+            .catch(() => {})
           break
-        case 403: errMsg = '拒绝访问'; break
-        case 404: errMsg = '请求地址不存在'; break
-        case 408: errMsg = '请求超时'; break
-        case 500: errMsg = '服务器内部错误'; break
-        case 502: errMsg = '网关错误'; break
-        case 503: errMsg = '服务不可用'; break
-        case 504: errMsg = '网关超时'; break
-        default: errMsg = `HTTP ${status}：${response.statusText || '请求失败'}`
+        case 403:
+          errMsg = '拒绝访问'
+          break
+        case 404:
+          errMsg = '请求地址不存在'
+          break
+        case 408:
+          errMsg = '请求超时'
+          break
+        case 500:
+          errMsg = '服务器内部错误'
+          break
+        case 502:
+          errMsg = '网关错误'
+          break
+        case 503:
+          errMsg = '服务不可用'
+          break
+        case 504:
+          errMsg = '网关超时'
+          break
+        default:
+          errMsg = `HTTP ${status}：${response.statusText || '请求失败'}`
       }
       // 移除 pending
       if (config && config.noCancel !== true) {
@@ -219,8 +246,9 @@ service.interceptors.response.use(
     if (config?.silent !== true) {
       ElMessage.error(errMsg)
     }
+
     return Promise.reject(error)
-  }
+  },
 )
 
 /* ======================================================================
@@ -257,6 +285,7 @@ const request = {
    */
   upload(url, file, extra = {}, config = {}) {
     let form = file
+
     if (!(file instanceof FormData)) {
       form = new FormData()
       if (Array.isArray(file)) {
@@ -266,9 +295,10 @@ const request = {
       }
       Object.keys(extra).forEach((k) => form.append(k, extra[k]))
     }
+
     return service.post(url, form, {
       headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 60000,   // 上传给足时间
+      timeout: 60000, // 上传给足时间
       ...config,
     })
   },
@@ -280,29 +310,34 @@ const request = {
    * @returns {Promise<Blob>}
    */
   download(url, config = {}) {
-    return service.get(url, {
-      responseType: 'blob',
-      ...config,
-    }).then((res) => {
-      // res 是 axios response（responseType=blob 时拦截器直接返回 response）
-      const blob = res.data || res
-      // 从 Content-Disposition 解析文件名
-      const disposition = res.headers?.['content-disposition'] || ''
-      let filename = 'download'
-      const match = /filename\*?=(?:UTF-8'')?([^;]+)/i.exec(disposition)
-      if (match && match[1]) {
-        filename = decodeURIComponent(match[1].replace(/^["']|["']$/g, ''))
-      }
-      // 触发浏览器下载
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(link.href)
-      return blob
-    })
+    return service
+      .get(url, {
+        responseType: 'blob',
+        ...config,
+      })
+      .then((res) => {
+        // res 是 axios response（responseType=blob 时拦截器直接返回 response）
+        const blob = res.data || res
+        // 从 Content-Disposition 解析文件名
+        const disposition = res.headers?.['content-disposition'] || ''
+        let filename = 'download'
+        const match = /filename\*?=(?:UTF-8'')?([^;]+)/i.exec(disposition)
+
+        if (match && match[1]) {
+          filename = decodeURIComponent(match[1].replace(/^["']|["']$/g, ''))
+        }
+        // 触发浏览器下载
+        const link = document.createElement('a')
+
+        link.href = URL.createObjectURL(blob)
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(link.href)
+
+        return blob
+      })
   },
 
   /** 取消所有正在飞的请求（路由切换时用） */

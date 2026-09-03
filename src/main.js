@@ -3,6 +3,7 @@ import './style.css'
 import 'ol/ol.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import VueEasyPrint from 'vue-easy-print'
+
 import App from './App.vue'
 import router from './router/index.js'
 import pinia from './store/index.js'
