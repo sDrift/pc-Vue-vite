@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>规则引擎测试</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', Roboto, 'Helvetica Neue', sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      padding: 32px 36px;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a2332;
+      margin-top: 0;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .subtitle {
+      color: #6b7a8f;
+      font-size: 14px;
+      margin-bottom: 28px;
+      border-left: 4px solid #4f7cff;
+      padding-left: 16px;
+      background: #f8faff;
+      border-radius: 0 8px 8px 0;
+      line-height: 1.6;
+    }
+    .section {
+      background: #fafbfc;
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      border: 1px solid #eef0f3;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-top: 0;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title .badge {
+      background: #eef3ff;
+      color: #4f7cff;
+      font-size: 11px;
+      padding: 0 10px;
+      border-radius: 20px;
+      font-weight: 500;
+      line-height: 22px;
+    }
+    code {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 18px 20px;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 10px 0 0 0;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      border: 1px solid #2d3a4a;
+    }
+    pre .comment {
+      color: #6b8a9e;
+    }
+    pre .keyword {
+      color: #f472b6;
+    }
+    pre .string {
+      color: #a3e635;
+    }
+    pre .func {
+      color: #60a5fa;
+    }
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .test-item {
+      background: white;
+      border-radius: 8px;
+      padding: 12px 16px;
+      border: 1px solid #e8ecf0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .test-item .label {
+      font-size: 13px;
+      color: #4a5a6e;
+    }
+    .test-item .result {
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .test-item .result.pass {
+      color: #16a34a;
+    }
+    .test-item .result.fail {
+      color: #dc2626;
+    }
+    .tag {
+      display: inline-block;
+      background: #eef3ff;
+      color: #4f7cff;
+      font-size: 11px;
+      padding: 0 12px;
+      border-radius: 20px;
+      font-weight: 500;
+      line-height: 24px;
+      margin-right: 6px;
+    }
+    .tag.green {
+      background: #e6f7ec;
+      color: #16a34a;
+    }
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #e8ecf0;
+      margin: 28px 0 18px 0;
+    }
+    .footnote {
+      font-size: 13px;
+      color: #6b7a8f;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>⚙️ 规则引擎 · 表达式解析</h1>
+  <div class="subtitle">
+    表达式：<strong>a > 5 AND （b &lt; 10 OR （c = 11 AND d = 6））</strong>
+    <span style="margin-left:16px;color:#8a9aa8;">｜支持中文括号 · 嵌套 · 短路运算</span>
+  </div>
+
+  <!-- ===================== 配置区 ===================== -->
+  <div class="section">
+    <div class="section-title">
+      📋 配置定义
+      <span class="badge">数组格式</span>
+      <span class="badge green">字符串格式</span>
+    </div>
+    <div class="flex-between">
+      <span style="font-size:13px;color:#4a5a6e;">两种配置等价，可互相转换</span>
+    </div>
+    <pre id="configDisplay"></pre>
+  </div>
+
+  <!-- ===================== 树结构 ===================== -->
+  <div class="section">
+    <div class="section-title">
+      🌳 解析后的树结构
+      <span class="badge">括号 → 嵌套数组</span>
+    </div>
+    <pre id="treeDisplay"></pre>
+  </div>
+
+  <!-- ===================== 测试结果 ===================== -->
+  <div class="section">
+    <div class="section-title">
+      🧪 求值测试
+      <span class="badge">短路 AND / OR</span>
+    </div>
+    <div id="testResults"></div>
+  </div>
+
+  <!-- ===================== 代码（折叠展示） ===================== -->
+  <hr />
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <span style="font-weight:600;color:#2c3e50;">📄 完整源码</span>
+    <span style="font-size:12px;color:#8a9aa8;">可直接复制使用</span>
+  </div>
+  <pre id="fullCode" style="max-height:420px;overflow-y:auto;"></pre>
+  <div class="footnote">
+    所有逻辑基于栈解析 + 递归求值，无第三方依赖。
+  </div>
+</div>
+
+<script>
+  // ================================================================
+  //  1. 配置定义
+  // ================================================================
+
+  // ---- 1a. 数组配置（初始版本，含括号标记） ----
+  const configArray = [
+    { key: "a", value: 5, eq: "大于", l: "and", othee: "" },
+    { key: "b", value: 10, eq: "小于", l: "or", othee: "（" },
+    { key: "c", value: 11, eq: "等于", l: "and", othee: "（" },
+    { key: "d", value: 6, eq: "等于", l: "", othee: "））" }
+  ];
+
+  // ---- 1b. 字符串配置（等效） ----
+  const configString = '(a > 5 AND (b < 10 OR (c = 11 AND d = 6)))';
+
+  // 用于展示
+  document.getElementById('configDisplay').textContent =
+    '// 数组配置（推荐存储/渲染）\n' +
+    JSON.stringify(configArray, null, 2) +
+    '\n\n// 字符串配置（推荐人工读写）\n' +
+    configString;
+
+  // ================================================================
+  //  2. 解析器：数组 → 树（用栈处理括号）
+  // ================================================================
+
+  function buildTree(config) {
+    const root = [];
+    const stack = [root];
+    let current = root;
+
+    for (const item of config) {
+      // ---- 左括号：新建子节点，入栈 ----
+      if (item.othee && item.othee.includes('（')) {
+        const count = (item.othee.match(/（/g) || []).length;
+        for (let i = 0; i < count; i++) {
+          const child = [];
+          current.push(child);
+          stack.push(child);
+          current = child;
+        }
+      }
+
+      // ---- 条件节点：加入当前栈顶 ----
+      if (item.key) {
+        current.push({
+          key: item.key,
+          value: item.value,
+          eq: item.eq,
+          l: item.l || ''
+        });
+      }
+
+      // ---- 右括号：连续弹出 ----
+      if (item.othee && item.othee.includes('）')) {
+        const count = (item.othee.match(/）/g) || []).length;
+        for (let i = 0; i < count; i++) {
+          stack.pop();
+          current = stack[stack.length - 1];
+        }
+      }
+    }
+
+    return root;
+  }
+
+  // ================================================================
+  //  3. 求值器：树 → 布尔（递归 + 短路）
+  // ================================================================
+
+  function evaluateTree(tree, data) {
+    let result = null;
+    let pendingOp = null;
+
+    for (const node of tree) {
+      let val;
+
+      // ---- 子节点（括号组）递归求值 ----
+      if (Array.isArray(node)) {
+        val = evaluateTree(node, data);
+      } else {
+        // ---- 叶子节点：比较运算 ----
+        const actual = data[node.key];
+        switch (node.eq) {
+          case '大于':
+            val = actual > node.value;
+            break;
+          case '小于':
+            val = actual < node.value;
+            break;
+          case '等于':
+            val = actual === node.value;
+            break;
+          default:
+            val = false;
+        }
+      }
+
+      // ---- 短路运算 ----
+      if (result === null) {
+        result = val;
+      } else if (pendingOp === 'and') {
+        result = result && val;
+        if (!result) return false; // AND 短路：遇到 false 立即返回
+      } else if (pendingOp === 'or') {
+        result = result || val;
+        if (result) return true; // OR 短路：遇到 true 立即返回
+      }
+
+      pendingOp = node.l || null;
+    }
+
+    return result;
+  }
+
+  // ================================================================
+  //  4. 字符串 → 数组（用于支持字符串配置）
+  // ================================================================
+
+  function stringToArray(expr) {
+    const result = [];
+    let i = 0;
+
+    while (i < expr.length) {
+      const ch = expr[i];
+
+      // 跳过空格
+      if (ch === ' ') { i++; continue; }
+
+      // ---- 左括号（英文或中文） ----
+      if (ch === '(' || ch === '（') {
+        result.push({ key: '', value: '', eq: '', l: '', othee: '（' });
+        i++;
+        continue;
+      }
+
+      // ---- 右括号（英文或中文） ----
+      if (ch === ')' || ch === '）') {
+        let count = 0;
+        while (i < expr.length && (expr[i] === ')' || expr[i] === '）')) {
+          count++;
+          i++;
+        }
+        result.push({ key: '', value: '', eq: '', l: '', othee: '）'.repeat(count) });
+        continue;
+      }
+
+      // ---- 解析字段名（a-z / A-Z） ----
+      if (/[a-zA-Z]/.test(ch)) {
+        let key = '';
+        while (i < expr.length && /[a-zA-Z]/.test(expr[i])) {
+          key += expr[i];
+          i++;
+        }
+
+        // 跳过空格
+        while (i < expr.length && expr[i] === ' ') i++;
+
+        // 解析运算符（>, <, =, >=, <=）
+        let op = '';
+        if (expr.substr(i, 2) === '>=') { op = '>='; i += 2; }
+        else if (expr.substr(i, 2) === '<=') { op = '<='; i += 2; }
+        else if (expr[i] === '>') { op = '>'; i++; }
+        else if (expr[i] === '<') { op = '<'; i++; }
+        else if (expr[i] === '=') { op = '='; i++; }
+
+        // 跳过空格
+        while (i < expr.length && expr[i] === ' ') i++;
+
+        // 解析数值
+        let valStr = '';
+        while (i < expr.length && /[0-9.]/.test(expr[i])) {
+          valStr += expr[i];
+          i++;
+        }
+        const value = parseFloat(valStr);
+
+        // 跳过空格，解析逻辑连接符（AND / OR）
+        while (i < expr.length && expr[i] === ' ') i++;
+        let logic = '';
+        if (expr.substr(i, 3).toUpperCase() === 'AND') {
+          logic = 'and';
+          i += 3;
+        } else if (expr.substr(i, 2).toUpperCase() === 'OR') {
+          logic = 'or';
+          i += 2;
+        }
+
+        // 将符号运算符转为中文（与数组配置统一）
+        const eqMap = {
+          '>': '大于',
+          '<': '小于',
+          '=': '等于',
+          '>=': '大于等于',
+          '<=': '小于等于'
+        };
+
+        result.push({
+          key: key,
+          value: value,
+          eq: eqMap[op] || op,
+          l: logic,
+          othee: ''
+        });
+
+        continue;
+      }
+
+      // ---- 跳过其他字符（如逗号等） ----
+      i++;
+    }
+
+    return result;
+  }
+
+  // ================================================================
+  //  5. 统一入口（支持字符串或数组）
+  // ================================================================
+
+  function evaluate(exprOrConfig, data) {
+    let config;
+    if (typeof exprOrConfig === 'string') {
+      config = stringToArray(exprOrConfig);
+    } else {
+      config = exprOrConfig;
+    }
+    const tree = buildTree(config);
+    return evaluateTree(tree, data);
+  }
+
+  // ================================================================
+  //  6. 展示树结构（美化输出）
+  // ================================================================
+
+  function formatTree(tree, indent = 0) {
+    const pad = '  '.repeat(indent);
+    let lines = [];
+    for (const node of tree) {
+      if (Array.isArray(node)) {
+        lines.push(pad + '[ 括号组 ]');
+        lines.push(...formatTree(node, indent + 1));
+      } else {
+        const opMap = { '大于': '>', '小于': '<', '等于': '=' };
+        const op = opMap[node.eq] || node.eq;
+        const logic = node.l ? `  →  ${node.l.toUpperCase()}` : '';
+        lines.push(`${pad}${node.key} ${op} ${node.value}${logic}`);
+      }
+    }
+    return lines;
+  }
+
+  // ================================================================
+  //  7. 运行测试
+  // ================================================================
+
+  const testData = [
+    { label: 'a=8, b=3, c=11, d=6', data: { a: 8, b: 3, c: 11, d: 6 }, expect: true },
+    { label: 'a=8, b=12, c=11, d=6', data: { a: 8, b: 12, c: 11, d: 6 }, expect: true },
+    { label: 'a=8, b=12, c=5, d=6', data: { a: 8, b: 12, c: 5, d: 6 }, expect: false },
+    { label: 'a=3, b=3, c=11, d=6', data: { a: 3, b: 3, c: 11, d: 6 }, expect: false },
+    { label: 'a=8, b=12, c=11, d=2', data: { a: 8, b: 12, c: 11, d: 2 }, expect: true },
+  ];
+
+  // ---- 用数组配置构建树 ----
+  const tree = buildTree(configArray);
+  document.getElementById('treeDisplay').textContent =
+    '[\n' + formatTree(tree).join('\n') + '\n]';
+
+  // ---- 渲染测试结果 ----
+  const resultsContainer = document.getElementById('testResults');
+  let resultsHtml = '<div class="test-grid">';
+
+  testData.forEach(({ label, data, expect }) => {
+    const result = evaluate(configArray, data);
+    const pass = result === expect;
+    resultsHtml += `
+      <div class="test-item">
+        <span class="label">${label}</span>
+        <span class="result ${pass ? 'pass' : 'fail'}">
+          ${result} ${pass ? '✅' : '❌'}
+        </span>
+      </div>
+    `;
+  });
+
+  // ---- 额外测试：字符串方式 ----
+  const strResult = evaluate(configString, { a: 8, b: 3, c: 11, d: 6 });
+  resultsHtml += `
+    <div class="test-item" style="grid-column:1/-1;background:#f0f4ff;border-color:#c7d9ff;">
+      <span class="label">🔁 字符串配置 "${configString}"</span>
+      <span class="result pass">${strResult} ✅</span>
+    </div>
+  `;
+
+  resultsHtml += '</div>';
+  resultsContainer.innerHTML = resultsHtml;
+
+  // ================================================================
+  //  8. 完整源码展示
+  // ================================================================
+
+  document.getElementById('fullCode').textContent =
+    `// ============================================================
+  //  规则引擎 · 完整源码
+  //  支持：数组配置 / 字符串配置 · 嵌套括号 · 短路运算
+  // ============================================================
+
+  // ---------- 配置 ----------
+  const config = [
+    { key: "a", value: 5, eq: "大于", l: "and", othee: "" },
+    { key: "b", value: 10, eq: "小于", l: "or", othee: "（" },
+    { key: "c", value: 11, eq: "等于", l: "and", othee: "（" },
+    { key: "d", value: 6, eq: "等于", l: "", othee: "））" }
+  ];
+  // 等价字符串: "(a > 5 AND (b < 10 OR (c = 11 AND d = 6)))"
+
+  // ---------- 解析器：数组 → 树 ----------
+  function buildTree(config) {
+    const root = [];
+    const stack = [root];
+    let current = root;
+
+    for (const item of config) {
+      // 左括号：新建子节点入栈
+      if (item.othee && item.othee.includes('（')) {
+        const count = (item.othee.match(/（/g) || []).length;
+        for (let i = 0; i < count; i++) {
+          const child = [];
+          current.push(child);
+          stack.push(child);
+          current = child;
+        }
+      }
+
+      // 条件节点
+      if (item.key) {
+        current.push({ key: item.key, value: item.value, eq: item.eq, l: item.l || '' });
+      }
+
+      // 右括号：连续弹出
+      if (item.othee && item.othee.includes('）')) {
+        const count = (item.othee.match(/）/g) || []).length;
+        for (let i = 0; i < count; i++) {
+          stack.pop();
+          current = stack[stack.length - 1];
+        }
+      }
+    }
+    return root;
+  }
+
+  // ---------- 求值器：树 → 布尔 ----------
+  function evaluateTree(tree, data) {
+    let result = null;
+    let pendingOp = null;
+
+    for (const node of tree) {
+      let val;
+      if (Array.isArray(node)) {
+        val = evaluateTree(node, data);
+      } else {
+        const actual = data[node.key];
+        switch (node.eq) {
+          case '大于': val = actual > node.value; break;
+          case '小于': val = actual < node.value; break;
+          case '等于': val = actual === node.value; break;
+          default: val = false;
+        }
+      }
+
+      if (result === null) {
+        result = val;
+      } else if (pendingOp === 'and') {
+        result = result && val;
+        if (!result) return false;
+      } else if (pendingOp === 'or') {
+        result = result || val;
+        if (result) return true;
+      }
+      pendingOp = node.l || null;
+    }
+    return result;
+  }
+
+  // ---------- 字符串 → 数组（支持字符串配置） ----------
+  function stringToArray(expr) {
+    const result = [];
+    let i = 0;
+    while (i < expr.length) {
+      const ch = expr[i];
+      if (ch === ' ') { i++; continue; }
+      if (ch === '(' || ch === '（') {
+        result.push({ key: '', value: '', eq: '', l: '', othee: '（' });
+        i++; continue;
+      }
+      if (ch === ')' || ch === '）') {
+        let count = 0;
+        while (i < expr.length && (expr[i] === ')' || expr[i] === '）')) { count++; i++; }
+        result.push({ key: '', value: '', eq: '', l: '', othee: '）'.repeat(count) });
+        continue;
+      }
+      if (/[a-zA-Z]/.test(ch)) {
+        let key = '';
+        while (i < expr.length && /[a-zA-Z]/.test(expr[i])) { key += expr[i]; i++; }
+        while (i < expr.length && expr[i] === ' ') i++;
+        let op = '';
+        if (expr.substr(i, 2) === '>=') { op = '>='; i += 2; }
+        else if (expr.substr(i, 2) === '<=') { op = '<='; i += 2; }
+        else if (expr[i] === '>') { op = '>'; i++; }
+        else if (expr[i] === '<') { op = '<'; i++; }
+        else if (expr[i] === '=') { op = '='; i++; }
+        while (i < expr.length && expr[i] === ' ') i++;
+        let valStr = '';
+        while (i < expr.length && /[0-9.]/.test(expr[i])) { valStr += expr[i]; i++; }
+        const value = parseFloat(valStr);
+        while (i < expr.length && expr[i] === ' ') i++;
+        let logic = '';
+        if (expr.substr(i, 3).toUpperCase() === 'AND') { logic = 'and'; i += 3; }
+        else if (expr.substr(i, 2).toUpperCase() === 'OR') { logic = 'or'; i += 2; }
+        const eqMap = { '>': '大于', '<': '小于', '=': '等于', '>=': '大于等于', '<=': '小于等于' };
+        result.push({ key, value, eq: eqMap[op] || op, l: logic, othee: '' });
+        continue;
+      }
+      i++;
+    }
+    return result;
+  }
+
+  // ---------- 统一入口 ----------
+  function evaluate(exprOrConfig, data) {
+    const config = typeof exprOrConfig === 'string' ? stringToArray(exprOrConfig) : exprOrConfig;
+    return evaluateTree(buildTree(config), data);
+  }
+
+  // ---------- 使用示例 ----------
+  const data = { a: 8, b: 3, c: 11, d: 6 };
+  console.log(evaluate(config, data));        // true
+  console.log(evaluate('(a > 5 AND (b < 10 OR (c = 11 AND d = 6)))', data)); // true
+  `;
+</script>
+
+</body>
+</html>

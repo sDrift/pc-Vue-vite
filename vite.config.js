@@ -29,6 +29,9 @@ export default defineConfig(({ mode }) => {
   const isCdnEnabled = isProd && cdnProvider !== 'off' && cdnModules.length > 0
 
   return {
+    /* 部署访问前缀，例如最终通过 https://example.com/uuu/ 访问 */
+    base: '/',
+
     /* ============================== 插件 ============================== */
     plugins: [
       vue(),

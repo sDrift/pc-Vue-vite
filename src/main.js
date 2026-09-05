@@ -1,10 +1,14 @@
-import { createApp } from 'vue'
 import './style.css'
 import 'ol/ol.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import 'element-plus/dist/index.css'
+// import ElementPlus from 'element-plus'
+// import * as Vue from 'vue'
+import { createApp } from 'vue'
 import VueEasyPrint from 'vue-easy-print'
 
 import App from './App.vue'
+import MyLib from './libs/my-test-lib/my-lib.mjs'
 import router from './router/index.js'
 import pinia from './store/index.js'
 
@@ -20,6 +24,16 @@ window.CESIUM_BASE_URL = '/cesium/'
 
 const app = createApp(App)
 
+// 1. 导入你的组件库（ES 格式）
+// 2. 导入样式
+import './libs/my-test-lib/style.css'
+
+app.use(MyLib)
+
+// 将 Vue 和 ElementPlus 暴露到 window，供 UMD 包使用
+// window.Vue = Vue
+// window.ElementPlus = ElementPlus
+
 // Element Plus 组件 / 样式 / 命令式 API（ElMessage 等）已由 vite 插件按需引入：
 //   - unplugin-vue-components    → 自动注册模板里的 <el-xxx> 组件
 //   - unplugin-auto-import       → 自动 import ElMessage / ElMessageBox 等
@@ -33,5 +47,8 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 app.use(router)
 app.use(pinia)
 app.use(VueEasyPrint)
-
+// app.use(ElementPlus)
 app.mount('#app')
+
+// ✅ 导出 app 供其他模块使用
+export { app }

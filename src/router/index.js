@@ -1,8 +1,26 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import { app } from '@/main' // 导入根实例
+import { loadComponentLib } from '@/utils/loadCDN'
+
 import { getDynamicRoutes } from '../api/menu.js'
 
 import { buildRoutes } from './dynamic.js'
+
+const getlib = async () => {
+  const MyLib = await loadComponentLib()
+
+  console.log(MyLib, 222)
+  if (MyLib && typeof MyLib.install === 'function') {
+    app.use(MyLib)
+    console.log('✅ 组件库已全局注册，可用组件:', Object.keys(MyLib))
+    console.log('✅ 组件库已全局注册，可用组件:', app._context.components)
+  } else {
+    console.warn('组件库没有 install 方法，请检查导出')
+  }
+
+  console.log(MyLib, window.MyLib)
+}
 
 /* ------------------------------------------------------------------
  * 静态路由
@@ -175,6 +193,9 @@ export function resetDynamicRoutes() {
  * NotFound（带 name: 'NotFound'）时按 name 重导仍然落到 404。
  */
 router.beforeEach(async (to, from, next) => {
+  // if (!window.MyLib?.default) {
+  //   await getlib()
+  // }
   // 设置页面标题
   document.title = to.meta.title || '后台管理系统'
 

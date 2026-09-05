@@ -19,6 +19,7 @@
    glob 的 key 是相对当前文件的路径，如 '../views/charts/ChartDemo.vue' */
 const moduleMap = import.meta.glob(['../views/**/*.vue', '../components/**/*.vue'])
 
+// console.log(moduleMap, 111)
 /* 把「相对 src 的路径」转成「相对当前文件的路径」作为 glob key。
    例：'views/charts/ChartDemo.vue' → '../views/charts/ChartDemo.vue' */
 function toGlobKey(srcRelativePath) {
@@ -35,6 +36,23 @@ function resolveComponent(componentPath) {
 
   const key = toGlobKey(componentPath)
   const loader = moduleMap[key]
+
+  // console.log(componentPath, 222)
+  /**
+   **  测试不同的路径导入方式，发现只有 loader4 可以正确导入组件
+   **  loader2 和 loader3 都会报错，提示找不到组件
+   **  loader4 是直接使用绝对路径导入组件，符合 Vite 的要求
+   */
+  // if (componentPath === 'views/maps/MapDemo.vue') {
+  // const a = 'maps/'
+  // const loader2 = () => import(`../views/${a}MapDemo.vue`)
+  // const loader3 = () => import(`@/views/${componentPath.replace('views/', '').replace('.vue', '')}.vue`)
+  // const loader4 = () => import(`@/views/maps/MapDemo.vue`)
+  // console.log(loader2, loader2(), 333)
+  // console.log(loader3, loader3(), 333)
+  // console.log(loader4, loader4(), 333)
+  // return loader4
+  // }
 
   if (!loader) {
     console.warn(`[dynamic routes] 找不到组件: ${componentPath}`)

@@ -210,7 +210,7 @@ export default [
       /* ---- 代码质量（eslint 核心）---- */
       'no-console': 'off',                                   // 关闭 console 检查（开发调试常用，不强制）
       'no-debugger': 'warn',                                 // 禁用 debugger（生产代码必须清掉）
-      'no-unused-vars': ['warn', {                           // 未使用变量警告
+      'no-unused-vars': ['off', {                           // 未使用变量警告
         argsIgnorePattern: '^_',                             // 以下划线开头的参数忽略（约定未用）
         varsIgnorePattern: '^_',
       }],

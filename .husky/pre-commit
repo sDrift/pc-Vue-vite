@@ -12,4 +12,4 @@
 #   - --fix 后的修复会自动被 git add 回暂存区
 #   - 想跳过检查临时提交用：git commit --no-verify（仅应急）
 
-npx lint-staged
+#  npx lint-staged

@@ -17,7 +17,8 @@
         <div class="metric-label">订单数</div>
       </div>
       <div class="metric-card">
-        <div class="metric-value">¥{{ stats.revenue }}</div>
+        <!-- <div class="metric-value">¥{{ stats.revenue }}</div> -->
+        <el-input v-model="stats.revenue" prefix-icon="el-icon-money" size="small" />
         <div class="metric-label">营收</div>
       </div>
     </div>
