@@ -63,11 +63,20 @@
                   </el-form>
                   <el-divider content-position="left" border-style="dashed">选项列表</el-divider>
                   <div class="option-list">
-                    <el-button type="primary" size="small" @click="addOption(item)">
-                      添加选项
-                    </el-button>
-
-                    <div v-for="(opt, optIdx) in item.options" :key="opt.key" class="option-row">
+                    <div v-if="typeof item.options === 'string'" class="option-row">
+                      <span class="option-label">异步选项</span>
+                      <el-input v-model="item.options" placeholder="请输入函数名" />
+                    </div>
+                    <div v-else class="option-row">
+                      <el-button type="primary" size="small" @click="addOption(item)">
+                        添加选项
+                      </el-button>
+                    </div>
+                    <div
+                      v-for="(opt, optIdx) in typeof item.options !== 'string' ? item.options : []"
+                      :key="opt.key"
+                      class="option-row"
+                    >
                       <span class="option-label">选项 {{ optIdx + 1 }}</span>
                       <el-input v-model="opt.key" placeholder="option key" size="default" />
                       <el-input v-model="opt.name" placeholder="option name" size="default" />
@@ -134,7 +143,22 @@
                   </el-select>
                 </el-form-item>
               </template>
+              123
+              <MyTable
+                :columns="lib.columns"
+                :data="lib.data"
+                :show-actions="true"
+                @edit="lib.handleEdit"
+                @delete="lib.handleDelete"
+              />
+              <el-form-item>
+                <div>
+                  <MyButton label="提交" type="primary" @my-click-button="lib.submit" />
+                </div>
+              </el-form-item>
             </el-form>
+            <!-- button 放在form会触发 el-form-item的submit事件，导致表单提交，刷新页面，所以放在form外面 添加type="button"就不会触发了 -->
+            <MyButton label="提交" type="primary" @my-click-button="lib.submit" />
           </div>
         </div>
       </div>
@@ -145,6 +169,22 @@
 <script setup>
 // 常用 API，按需使用
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
+// 引入打包后的 JS 和 CSS  已在main.js全局注册
+// import { MyTable, MyButton } from '@/libs/my-test-lib/my-lib.mjs'
+// import '@/libs/my-test-lib/style.css'
+const lib = reactive({
+  columns: [
+    { key: 'name', title: '姓名' },
+    { key: 'age', title: '年龄' },
+  ],
+  data: [
+    { name: '张三', age: 20 },
+    { name: '李四', age: 25 },
+  ],
+  submit: (e) => console.log('提交', e),
+  handleEdit: (row) => console.log('编辑', row),
+  handleDelete: (row) => console.log('删除', row),
+})
 
 const typeOptions = ref([
   { name: '输入框', value: 'input' },
@@ -282,7 +322,7 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .playground {
   width: 100%;
   min-height: 100%;
@@ -292,6 +332,10 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+:deep(.my-button) {
+  color: #f8f9fb;
 }
 
 .pg-header {
@@ -414,7 +458,7 @@ onUnmounted(() => {
   color: #909399;
 }
 
-@media (width <= 1024px) {
+@media (width <=1024px) {
   .pg-main {
     flex-direction: column;
   }
@@ -425,7 +469,7 @@ onUnmounted(() => {
   }
 }
 
-@media (width <= 768px) {
+@media (width <=768px) {
   .option-row {
     grid-template-columns: 72px 1fr;
   }

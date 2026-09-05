@@ -68,7 +68,7 @@
 
       <el-card class="chart-card">
         <template #header>
-          <div class="card-header">
+          <div class="card-header" @click="handleInit">
             <span>用户活跃度</span>
           </div>
         </template>
@@ -102,25 +102,31 @@
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { ref } from 'vue'
 
-// 注册Element Plus图标
-const icons = {
-  'el-icon-user': ElementPlusIconsVue.User,
-  'el-icon-goods': ElementPlusIconsVue.Goods,
-  'el-icon-shopping-cart': ElementPlusIconsVue.ShoppingCart,
-  'el-icon-money': ElementPlusIconsVue.Money,
-  'el-icon-data-line': ElementPlusIconsVue.DataLine,
-  'el-icon-data-analysis': ElementPlusIconsVue.DataAnalysis,
+import { init as initUtils } from '@/utils/index.js'
+
+const handleInit = () => {
+  initUtils()
 }
 
-// 创建组件对象
-const components = {
-  'el-icon-user': icons['el-icon-user'],
-  'el-icon-goods': icons['el-icon-goods'],
-  'el-icon-shopping-cart': icons['el-icon-shopping-cart'],
-  'el-icon-money': icons['el-icon-money'],
-  'el-icon-data-line': icons['el-icon-data-line'],
-  'el-icon-data-analysis': icons['el-icon-data-analysis'],
-}
+// 注册Element Plus图标
+// const icons = {
+//   'el-icon-user': ElementPlusIconsVue.User,
+//   'el-icon-goods': ElementPlusIconsVue.Goods,
+//   'el-icon-shopping-cart': ElementPlusIconsVue.ShoppingCart,
+//   'el-icon-money': ElementPlusIconsVue.Money,
+//   'el-icon-data-line': ElementPlusIconsVue.DataLine,
+//   'el-icon-data-analysis': ElementPlusIconsVue.DataAnalysis,
+// }
+
+// // 创建组件对象
+// const components = {
+//   'el-icon-user': icons['el-icon-user'],
+//   'el-icon-goods': icons['el-icon-goods'],
+//   'el-icon-shopping-cart': icons['el-icon-shopping-cart'],
+//   'el-icon-money': icons['el-icon-money'],
+//   'el-icon-data-line': icons['el-icon-data-line'],
+//   'el-icon-data-analysis': icons['el-icon-data-analysis'],
+// }
 
 // 统计数据
 const totalUsers = ref(256)

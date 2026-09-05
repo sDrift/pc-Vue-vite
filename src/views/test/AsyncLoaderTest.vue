@@ -110,7 +110,7 @@
  */
 
 import { MessageBox } from '@element-plus/icons-vue'
-import { shallowRef, ref, computed, provide, inject, defineAsyncComponent } from 'vue'
+import { ref, markRaw, provide, inject, defineAsyncComponent } from 'vue'
 
 /* ====================================================================
  * withRetry — 自动重试辅助函数（指数退避）
@@ -169,16 +169,18 @@ const withRetry = (fn, maxRetry = 3) => {
  * ==================================================================== */
 const makeLoader = (key) => () => {
   // 注意：key 必须是静态可推导的，所以用 map 而不是纯模板字符串
-  const map = {
-    a: () => import('./async-children/ChildA.vue'),
-    b: () => import('./async-children/ChildB.vue'),
-    c: () => import('./async-children/ChildC.vue'),
-  }
+  // const map = {
+  //   a: () => import('./async-children/ChildA.vue'),
+  //   b: () => import('./async-children/ChildB.vue'),
+  //   c: () => import('./async-children/ChildC.vue'),
+  // }
+  const c = () => import('./async-children/ChildA.vue')
 
   return defineAsyncComponent({
     // 用 withRetry 包装：loader 内部失败时自动重试 3 次（500/1000/1500ms）
     //   重试都失败后，loader 才真正 reject → wrapper 进入 error 状态
-    loader: () => withRetry(map[key], 3),
+    // loader: () => withRetry(map[key], 3),
+    loader: () => withRetry(c, 3),
     // 加载中显示的组件（可选）
     loadingComponent: {
       template: '<div class="async-loading">⏳ 正在加载组件…</div>',
@@ -211,9 +213,17 @@ const makeLoader = (key) => () => {
 }
 
 const loaders = {
-  a: makeLoader('a'),
-  b: makeLoader('b'),
-  c: makeLoader('c'),
+  // a: makeLoader('a'),
+  // b: makeLoader('b'),
+  // c: makeLoader('c'),
+}
+
+const getLoader = (key) => {
+  if (!loaders[key]) {
+    loaders[key] = makeLoader(key)()
+  }
+
+  return loaders[key]
 }
 
 /* ====================================================================
@@ -254,7 +264,9 @@ const showChild = (key) => {
 
   // 首次点击才创建 wrapper（此时才开始下载 chunk）
   if (!cache[key]) {
-    cache[key] = loaders[key]()
+    console.log(loaders)
+    cache[key] = markRaw(getLoader(key)) // markRaw：避免 wrapper 被深响应化，触发不必要的更新
+    console.log(loaders)
     loadedKeys.value.push(key)
     console.log(`[AsyncLoader] 首次加载组件 ${key.toUpperCase()}，已触发动态 import()`)
   } else {
